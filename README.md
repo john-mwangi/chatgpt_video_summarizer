@@ -1,2 +1,2 @@
 # About
-Watch videos using AI.
+Summarise videos using AI.
