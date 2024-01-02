@@ -58,12 +58,11 @@ def save_trancript(transcript: list[str], video_id: str, file_dir: Path) -> None
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     video_title = get_video_title(video_url)
     file_path = file_dir / video_title
-    file_path = f"{file_path}.txt"
 
     if not file_dir.exists():
         file_dir.mkdir()
 
-    with open(file_path, mode="w") as f:
+    with open(f"{file_path}.txt", mode="w") as f:
         f.writelines(transcript)
 
 
@@ -71,13 +70,13 @@ def convert_video_ts(s: float) -> str:
     """Converts a video time stamp in secs to H:M:S"""
 
     hour, remainder_secs = divmod(s, 3600)
-    minutes, secs = divmod(remainder_secs, 60)
+    mins, secs = divmod(remainder_secs, 60)
 
     hour = int(hour)
-    minutes = str(int(minutes)).zfill(2)
-    secs = str(int(secs)).zfill(2)
+    minutes = str(int(mins)).zfill(2)
+    seconds = str(int(secs)).zfill(2)
 
-    res = f"{hour}:{minutes}:{secs}"
+    res = f"{hour}:{minutes}:{seconds}"
     return res
 
 
