@@ -21,7 +21,7 @@ def get_video_id(url: str) -> str:
     return url.split("?v=", 1)[-1]
 
 
-def get_video_transcript(video_id: str) -> str:
+def get_video_transcript(video_id: str) -> list[str]:
     """Extract video transcript and save as text file"""
 
     yt = YouTubeTranscriptApi()
@@ -34,7 +34,7 @@ def get_video_transcript(video_id: str) -> str:
         ts = convert_video_ts(s)
         tr.append(f"\n{ts} - {t}")
 
-    return "".join(tr)
+    return tr
 
 
 def get_video_title(video_url: str) -> str:
@@ -52,7 +52,7 @@ def get_video_title(video_url: str) -> str:
     return data.get("title", "Unknown Video Title")
 
 
-def save_trancript(transcript: str, video_id: str, file_dir: Path) -> None:
+def save_trancript(transcript: list[str], video_id: str, file_dir: Path) -> None:
     """Saves a transcript to a location"""
 
     video_url = f"https://www.youtube.com/watch?v={video_id}"
@@ -64,7 +64,7 @@ def save_trancript(transcript: str, video_id: str, file_dir: Path) -> None:
         file_dir.mkdir()
 
     with open(file_path, mode="w") as f:
-        f.write(transcript)
+        f.writelines(transcript)
 
 
 def convert_video_ts(s: float) -> str:
