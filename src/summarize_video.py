@@ -4,7 +4,6 @@ from langchain.prompts import PromptTemplate
 template = """system: You are a helpful assistant who provides helpful summaries 
 to a video transcript. The format of the transcript is `timestamp - dialogue`.
 
-{conversation_history}
 user: {question}
 assistant:
 """
@@ -49,7 +48,7 @@ if __name__ == "__main__":
     model = LLMChain(
         llm=ChatOpenAI(model="gpt-4-1106-preview"),
         prompt=prompt_template,
-        memory=memory,
+        # memory=memory,
     )
 
     paths = transcript_dir.glob("*.txt")
