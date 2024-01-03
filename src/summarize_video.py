@@ -2,7 +2,7 @@ from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 
 template = """system: You are a helpful assistant who provides helpful summaries 
-to a video transcript. The format of the transcript is `timestamp - dialogue`.
+to a video transcript. The format of the video transcript is `timestamp - dialogue`.
 
 user: {question}
 assistant:
@@ -36,19 +36,44 @@ def chunk_transcript(transcript: list[str], chunk_size: int) -> list[list[str]]:
     return result
 
 
+def create_summary(model, limit, video_transcript, bullets) -> str:
+    """Provides a summary for a video transcript"""
+
+    question = f"""Consider the following video transcript: 
+    
+    {video_transcript} 
+    
+    Begin by providing a concise single sentence summary of the what 
+    is being discussed in the transcript. Then follow it with bullet 
+    points of the {bullets} most important points along with their associated 
+    timestamps. The total number of words should not be more than {limit}.
+    """
+
+    summary = model.predict(question=question)
+    return summary
+
+
 if __name__ == "__main__":
+    import pickle
+
     from dotenv import load_dotenv
     from langchain.chains import LLMChain
     from langchain.chat_models import ChatOpenAI
 
-    from params import CHUNK_SIZE, LIMIT_CHUNKS, transcript_dir
+    from params import (
+        BATCH_CHUNKS,
+        BULLETS,
+        CHUNK_SIZE,
+        LIMIT_CHUNKS,
+        SUMMARY_LIMIT,
+        transcript_dir,
+    )
 
     load_dotenv()
 
     model = LLMChain(
         llm=ChatOpenAI(model="gpt-4-1106-preview"),
         prompt=prompt_template,
-        # memory=memory,
     )
 
     paths = transcript_dir.glob("*.txt")
@@ -59,15 +84,22 @@ if __name__ == "__main__":
 
     transcripts = chunk_transcript(transcript, CHUNK_SIZE)
 
-    for video_transcript in transcripts[:LIMIT_CHUNKS]:
-        question = f"""Consider the following video transcript: 
-            
-            {video_transcript} 
-            
-            Begin by providing a concise summary of the what is being discussed in 
-            the transcript as a paragraph. Then follow it with bullet points of the 
-            important points along with their associated timestamps."""
+    # summaries = []
 
-        msg = model.predict(question=question)
+    # for video_transcript in transcripts[:LIMIT_CHUNKS]:
+    #     summary = create_summary(
+    #         model=model,
+    #         limit=SUMMARY_LIMIT,
+    #         video_transcript=video_transcript,
+    #         bullets=BULLETS,
+    #     )
+    #     summaries.append(summary)
 
-        print(msg, "\n\n")
+    # with open("summaries.pkl", mode="wb") as f:
+    #     pickle.dump(summaries, f)
+
+    with open("summaries.pkl", mode="rb") as f:
+        summaries = pickle.load(f)
+
+    breakpoint()
+    batch_summaries = chunk_transcript(transcript=summaries, chunk_size=BATCH_CHUNKS)
