@@ -41,7 +41,7 @@ if __name__ == "__main__":
     from langchain.chains import LLMChain
     from langchain.chat_models import ChatOpenAI
 
-    from params import CHUNK_SIZE, transcript_dir
+    from params import CHUNK_SIZE, LIMIT_CHUNKS, transcript_dir
 
     load_dotenv()
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     transcripts = chunk_transcript(transcript, CHUNK_SIZE)
 
-    for video_transcript in transcripts[:3]:
+    for video_transcript in transcripts[:LIMIT_CHUNKS]:
         question = f"""Consider the following video transcript: 
             
             {video_transcript} 
