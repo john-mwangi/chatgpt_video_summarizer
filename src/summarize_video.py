@@ -1,8 +1,8 @@
 from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 
-template = """system: You are a helpful assistant who provides helpful responses 
-to the video transcript below. The format of the transcript is `timestamp - dialogue`:
+template = """system: You are a helpful assistant who provides helpful summaries 
+to a video transcript. The format of the transcript is `timestamp - dialogue`.
 
 {conversation_history}
 user: {question}
@@ -18,14 +18,31 @@ memory = ConversationBufferMemory(
     memory_key="conversation_history", ai_prefix="assistant", human_prefix="user"
 )
 
+
+def chunk_transcript(transcript: list[str], chunk_size: int) -> list[list[str]]:
+    """Converts a transcript into a smaller chunks"""
+
+    result = []
+    sublist = []
+
+    for _, t in enumerate(transcript):
+        if t.strip():
+            sublist.append(t)
+        if len(sublist) == chunk_size:
+            result.append(sublist)
+            sublist = []
+    if sublist:
+        result.append(sublist)
+
+    return result
+
+
 if __name__ == "__main__":
     from dotenv import load_dotenv
     from langchain.chains import LLMChain
     from langchain.chat_models import ChatOpenAI
 
-    from params import transcript_dir
-
-    LINES = 10
+    from params import CHUNK_SIZE, transcript_dir
 
     load_dotenv()
 
@@ -39,12 +56,19 @@ if __name__ == "__main__":
     path = list(paths)[0]
 
     with open(path, mode="r") as f:
-        lines = [line.strip() for line in f.readlines()]
+        transcript = [line.strip() for line in f.readlines()]
 
-    video_transcript = lines[:LINES]
-    msg = model.predict(
-        question=f"""Consider the following video transcript: {video_transcript} 
-        Which is the first project and what timestamp mentions the project?""",
-    )
+    transcripts = chunk_transcript(transcript, CHUNK_SIZE)
 
-    print(msg)
+    for video_transcript in transcripts[:3]:
+        question = f"""Consider the following video transcript: 
+            
+            {video_transcript} 
+            
+            Begin by providing a concise summary of the what is being discussed in 
+            the transcript as a paragraph. Then follow it with bullet points of the 
+            important points along with their associated timestamps."""
+
+        msg = model.predict(question=question)
+
+        print(msg, "\n\n")
