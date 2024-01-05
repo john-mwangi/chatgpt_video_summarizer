@@ -8,7 +8,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
-import params
+from . import params
 
 
 def init_model():

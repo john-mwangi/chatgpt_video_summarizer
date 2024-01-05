@@ -14,6 +14,8 @@ from pathlib import Path
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
+from .params import transcript_dir
+
 
 def get_video_id(url: str) -> str:
     """Extracts the YouTube video id from the url"""
@@ -80,7 +82,7 @@ def convert_video_ts(s: float) -> str:
     return res
 
 
-def main(url: str, dir: Path):
+def main(url: str, dir: Path = transcript_dir):
     video_id = get_video_id(url)
 
     vids = list(dir.glob("*.txt"))
@@ -94,7 +96,5 @@ def main(url: str, dir: Path):
 
 
 if __name__ == "__main__":
-    from params import transcript_dir
-
     URL = "https://www.youtube.com/watch?v=JEBDfGqrAUA"
-    main(URL, transcript_dir)
+    main(URL)
