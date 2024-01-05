@@ -1,5 +1,14 @@
+import pickle
+from pprint import pprint
+
+from dotenv import load_dotenv
+from langchain.chains import LLMChain
 from langchain.chains.conversation.memory import ConversationBufferMemory
+from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
+from tqdm import tqdm
+
+import params
 
 template = """system: You are a helpful assistant who provides helpful summaries 
 to a video transcript. The format of the video transcript is `timestamp - dialogue`.
@@ -53,17 +62,7 @@ def create_summary(model, limit, video_transcript, bullets) -> str:
     return summary
 
 
-if __name__ == "__main__":
-    import pickle
-    from pprint import pprint
-
-    from dotenv import load_dotenv
-    from langchain.chains import LLMChain
-    from langchain.chat_models import ChatOpenAI
-    from tqdm import tqdm
-
-    import params
-
+def main():
     load_dotenv()
 
     model = LLMChain(
@@ -96,10 +95,23 @@ if __name__ == "__main__":
 
         summaries = chunk_a_list(summaries, params.CHUNK_SIZE)
 
+    assert len(summaries) == 1, "You have not created a summary of summaries"
+
+    msg = create_summary(
+        model=model,
+        limit=params.SUMMARY_LIMIT,
+        video_transcript=summaries[0],
+        bullets=params.BULLETS,
+    )
+
     if not params.summaries_path.parent.exists():
         params.summaries_path.parent.mkdir()
 
     with open(params.summaries_path, mode="wb") as f:
-        pickle.dump(summaries, f)
+        pickle.dump(msg, f)
 
-    pprint(summaries[0])
+    pprint(msg)
+
+
+if __name__ == "__main__":
+    main()
