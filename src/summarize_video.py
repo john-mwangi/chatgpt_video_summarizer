@@ -72,6 +72,9 @@ def create_summary(model, limit, video_transcript, bullets) -> str:
 def check_if_summarised(t_path: Path, summary_dir: Path):
     """Checks if a transcript has already been summarised"""
 
+    is_summarised = False
+    summary = None
+
     t_name = t_path.stem
 
     s_paths = list(summary_dir.glob("*.json"))
@@ -79,8 +82,9 @@ def check_if_summarised(t_path: Path, summary_dir: Path):
 
     is_summarised = any([t_name == s_name for s_name in summary_names])
 
-    with open(f"{summary_dir / t_name}.json") as f:
-        summary = json.load(f).get("summary")
+    if is_summarised:
+        with open(f"{summary_dir / t_name}.json") as f:
+            summary = json.load(f).get("summary")
 
     return is_summarised, summary
 
@@ -89,6 +93,7 @@ def main():
     load_dotenv()
 
     model = init_model()
+    msgs = []
 
     paths = list(params.transcript_dir.glob("*.txt"))
     video_ids = [p.stem.split("vid:")[-1] for p in paths]
@@ -97,61 +102,57 @@ def main():
     for i, file in enumerate(files):
         vid, path = file
 
-        is_summarised, content = check_if_summarised(
+        is_summarised, msg = check_if_summarised(
             t_path=path, summary_dir=params.summaries_dir
         )
 
         if is_summarised:
-            print(f"Video '{path.stem}' has already been summarised\n\n")
-            pprint(content)
-            exit()
+            print(f"Video '{path.stem}' has already been summarised")
+            msgs.append(msg)
 
-        print(f"Summarising video '{path.stem}' ...")
+        else:
+            print(f"Summarising video '{path.stem}' ...")
 
-        with open(path, mode="r") as f:
-            transcript = [line.strip() for line in f.readlines()]
+            with open(path, mode="r") as f:
+                transcript = [line.strip() for line in f.readlines()]
 
-        transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
+            transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
 
-        if params.LIMIT_TRANSCRIPT is not None:
-            transcripts = transcripts[: params.LIMIT_TRANSCRIPT]
+            if params.LIMIT_TRANSCRIPT is not None:
+                transcripts = transcripts[: params.LIMIT_TRANSCRIPT]
 
-        # recursively chunk the list & summarise until len(summaries) == 1
-        summaries = []
-        while len(summaries) != 1:
-            for video_transcript in tqdm(transcripts):
-                summary = create_summary(
-                    model=model,
-                    limit=params.SUMMARY_LIMIT,
-                    video_transcript=video_transcript,
-                    bullets=params.BULLETS,
-                )
-                summaries.append(summary)
+            # recursively chunk the list & summarise until len(summaries) == 1
+            summaries = []
+            while len(summaries) != 1:
+                for video_transcript in tqdm(transcripts):
+                    summary = create_summary(
+                        model=model,
+                        limit=params.SUMMARY_LIMIT,
+                        video_transcript=video_transcript,
+                        bullets=params.BULLETS,
+                    )
+                    summaries.append(summary)
 
-            summaries = chunk_a_list(summaries, params.CHUNK_SIZE)
+                summaries = chunk_a_list(summaries, params.CHUNK_SIZE)
 
-        assert len(summaries) == 1, "You have not created a summary of summaries"
+            assert len(summaries) == 1, "You have not created a summary of summaries"
 
-        msg = create_summary(
-            model=model,
-            limit=params.SUMMARY_LIMIT,
-            video_transcript=summaries[0],
-            bullets=params.BULLETS,
-        )
+            msg = create_summary(
+                model=model,
+                limit=params.SUMMARY_LIMIT,
+                video_transcript=summaries[0],
+                bullets=params.BULLETS,
+            )
 
-        video_summary = {"video_id": vid, "summary": msg}
+            video_summary = {"video_id": vid, "summary": msg}
 
-        if not params.summaries_dir.exists():
-            params.summaries_dir.mkdir()
+            if not params.summaries_dir.exists():
+                params.summaries_dir.mkdir()
 
-        file_path = params.summaries_dir / f"{paths[i].stem}.json"
+            file_path = params.summaries_dir / f"{paths[i].stem}.json"
 
-        with open(file_path, mode="w") as f:
-            json.dump(video_summary, f)
+            with open(file_path, mode="w") as f:
+                json.dump(video_summary, f)
 
-    return msg
-
-
-if __name__ == "__main__":
-    msg = main()
-    pprint(msg)
+            msgs.append(msg)
+    return msgs
