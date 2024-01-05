@@ -14,3 +14,5 @@ BATCH_CHUNKS = 2
 # (0-1) for a proportion of the transcript
 # >=1 for a hardcorded number of transcript lines
 LIMIT_TRANSCRIPT = 0.25
+
+model = "gpt-4-1106-preview"
