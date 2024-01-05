@@ -88,6 +88,37 @@ def check_if_summarised(t_path: Path, summary_dir: Path):
     return is_summarised, summary
 
 
+# Define a function to use create_summary to summarize a single transcript
+def summarize_transcript_with_model(transcript, bullets, model, limit):
+    summary = create_summary(model, limit, transcript, bullets)
+    return summary
+
+
+# Define a function to combine summaries in chunks and summarize those chunks using the external model
+def summarize_chunked_summaries_with_model(
+    summaries, chunk_size, bullets, model, limit
+):
+    chunked_summaries = [
+        summaries[i : i + chunk_size] for i in range(0, len(summaries), chunk_size)
+    ]
+    combined_summaries = [
+        summarize_transcript_with_model(" ".join(chunk), bullets, model, limit)
+        for chunk in tqdm(chunked_summaries)
+    ]
+    return summarize_transcript_with_model(
+        " ".join(combined_summaries), bullets, model, limit
+    )
+
+
+# Function to summarize a list of transcripts using the external model
+def summarize_list_of_transcripts_with_model(transcripts, bullets, model, limit):
+    summaries = [
+        summarize_transcript_with_model(transcript, bullets, model, limit)
+        for transcript in tqdm(transcripts)
+    ]
+    return summaries
+
+
 def main():
     load_dotenv()
 
@@ -115,6 +146,7 @@ def main():
             with open(path, mode="r") as f:
                 transcript = [line.strip() for line in f.readlines()]
 
+            # Chunk the entire transcript into list of lines
             transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
 
             if (params.LIMIT_TRANSCRIPT is not None) & (params.LIMIT_TRANSCRIPT >= 1):
@@ -127,28 +159,27 @@ def main():
             else:
                 raise ValueError("incorrect value for LIMIT_TRANSCRIPT")
 
-            # recursively chunk the list & summarise until len(summaries) == 1
-            summaries = []
-            while len(summaries) != 1:
-                for video_transcript in tqdm(transcripts):
-                    summary = create_summary(
-                        model=model,
-                        limit=params.SUMMARY_LIMIT,
-                        video_transcript=video_transcript,
-                        bullets=params.BULLETS,
-                    )
-                    summaries.append(summary)
-
-                summaries = chunk_a_list(summaries, params.CHUNK_SIZE)
-
-            assert len(summaries) == 1, "You have not created a summary of summaries"
-
-            msg = create_summary(
-                model=model,
-                limit=params.SUMMARY_LIMIT,
-                video_transcript=summaries[0],
-                bullets=params.BULLETS,
+            # Summary of summaries: recursively chunk the list & summarise until len(summaries) == 1
+            # Summarize each transcript using the external model
+            list_of_summaries = summarize_list_of_transcripts_with_model(
+                transcripts, params.BULLETS, model, params.SUMMARY_LIMIT
             )
+
+            # Combine summaries in chunks and summarize them iteratively until a single summary is obtained
+            while len(list_of_summaries) > 1:
+                list_of_summaries = [
+                    summarize_chunked_summaries_with_model(
+                        list_of_summaries,
+                        params.CHUNK_SIZE,
+                        params.BULLETS,
+                        model,
+                        params.SUMMARY_LIMIT,
+                    )
+                ]
+
+            # Output the final summary
+            assert len(list_of_summaries) == 1, "Not a summary of summaries"
+            msg = list_of_summaries[0]
 
             video_summary = {"video_id": vid, "summary": msg}
 
