@@ -51,12 +51,12 @@ def chunk_a_list(data: list[str], chunk_size: int) -> list[list[str]]:
     return result
 
 
-def create_summary(model, limit, video_transcript, bullets) -> str:
+def summarize_transcript(transcript, bullets, model, limit) -> str:
     """Provides a summary for a video transcript"""
 
     question = f"""Consider the following video transcript: 
     
-    {video_transcript} 
+    {transcript} 
     
     Begin by providing a concise single sentence summary of the what 
     is being discussed in the transcript. Then follow it with bullet 
@@ -88,16 +88,9 @@ def check_if_summarised(t_path: Path, summary_dir: Path):
     return is_summarised, summary
 
 
-# Define a function to use create_summary to summarize a single transcript
-def summarize_transcript_with_model(transcript, bullets, model, limit):
-    summary = create_summary(model, limit, transcript, bullets)
-    return summary
+def summarize_chunked_summaries(summaries, chunk_size, bullets, model, limit):
+    """Create summary of summaries"""
 
-
-# Define a function to combine summaries in chunks and summarize those chunks using the external model
-def summarize_chunked_summaries_with_model(
-    summaries, chunk_size, bullets, model, limit
-):
     # list of lists / list of transcript summaries
     chunked_summaries = [
         summaries[i : i + chunk_size] for i in range(0, len(summaries), chunk_size)
@@ -105,20 +98,19 @@ def summarize_chunked_summaries_with_model(
 
     # join list contents into a single prompt/string and send to model
     combined_summaries = [
-        summarize_transcript_with_model(" ".join(chunk), bullets, model, limit)
+        summarize_transcript(" ".join(chunk), bullets, model, limit)
         for chunk in tqdm(chunked_summaries)
     ]
 
     # join together and send to model
-    return summarize_transcript_with_model(
-        " ".join(combined_summaries), bullets, model, limit
-    )
+    return summarize_transcript(" ".join(combined_summaries), bullets, model, limit)
 
 
-# Function to summarize a list of transcripts using the external model
-def summarize_list_of_transcripts_with_model(transcripts, bullets, model, limit):
+def summarize_list_of_transcripts(transcripts, bullets, model, limit):
+    """Summarize a list of transcripts"""
+
     summaries = [
-        summarize_transcript_with_model(transcript, bullets, model, limit)
+        summarize_transcript(transcript, bullets, model, limit)
         for transcript in tqdm(transcripts)
     ]
     return summaries
@@ -165,15 +157,15 @@ def main():
                 raise ValueError("incorrect value for LIMIT_TRANSCRIPT")
 
             # Summary of summaries: recursively chunk the list & summarise until len(summaries) == 1
-            # Summarize each transcript using the external model
-            list_of_summaries = summarize_list_of_transcripts_with_model(
+            # Summarize each transcript
+            list_of_summaries = summarize_list_of_transcripts(
                 transcripts, params.BULLETS, model, params.SUMMARY_LIMIT
             )
 
             # Combine summaries in chunks and summarize them iteratively until a single summary is obtained
             while len(list_of_summaries) > 1:
                 list_of_summaries = [
-                    summarize_chunked_summaries_with_model(
+                    summarize_chunked_summaries(
                         list_of_summaries,
                         params.CHUNK_SIZE,
                         params.BULLETS,
