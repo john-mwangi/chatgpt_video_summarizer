@@ -1,12 +1,5 @@
 """Extract transcript from a YouTube video"""
 
-# provide youtube url
-# get the video id from the url
-# extract transctipt from youtube video as text file
-# if the transcript is not in english, translate it
-# save text as file with naming convention: channel_name-video_name
-# summarize text using an open source model from hugging face
-
 import json
 import urllib.parse
 import urllib.request
