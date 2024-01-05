@@ -1,7 +1,8 @@
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent.parent.resolve()
-transcript_dir = ROOT_DIR / "transcripts"
+transcript_dir = ROOT_DIR / "files/transcripts"
+summaries_path = ROOT_DIR / "files/summaries.pkl"
 
 CHUNK_SIZE = 10
 LIMIT_TRANSCRIPT = 4  # use None to process entire video transcript
