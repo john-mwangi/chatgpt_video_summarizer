@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from pprint import pprint
 
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
@@ -118,8 +117,15 @@ def main():
 
             transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
 
-            if params.LIMIT_TRANSCRIPT is not None:
+            if (params.LIMIT_TRANSCRIPT is not None) & (params.LIMIT_TRANSCRIPT >= 1):
                 transcripts = transcripts[: params.LIMIT_TRANSCRIPT]
+
+            elif params.LIMIT_TRANSCRIPT < 1:
+                length = len(transcripts) * params.LIMIT_TRANSCRIPT
+                transcripts = transcripts[: int(length)]
+
+            else:
+                raise ValueError("incorrect value for LIMIT_TRANSCRIPT")
 
             # recursively chunk the list & summarise until len(summaries) == 1
             summaries = []
