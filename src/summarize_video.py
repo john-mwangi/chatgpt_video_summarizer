@@ -98,13 +98,18 @@ def summarize_transcript_with_model(transcript, bullets, model, limit):
 def summarize_chunked_summaries_with_model(
     summaries, chunk_size, bullets, model, limit
 ):
+    # list of lists / list of transcript summaries
     chunked_summaries = [
         summaries[i : i + chunk_size] for i in range(0, len(summaries), chunk_size)
     ]
+
+    # join list contents into a single prompt/string and send to model
     combined_summaries = [
         summarize_transcript_with_model(" ".join(chunk), bullets, model, limit)
         for chunk in tqdm(chunked_summaries)
     ]
+
+    # join together and send to model
     return summarize_transcript_with_model(
         " ".join(combined_summaries), bullets, model, limit
     )
