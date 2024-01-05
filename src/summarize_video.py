@@ -1,4 +1,6 @@
-import pickle
+import json
+from pathlib import Path
+from pprint import pprint
 
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
@@ -67,56 +69,83 @@ def create_summary(model, limit, video_transcript, bullets) -> str:
     return summary
 
 
+def check_if_summarised(t_path: Path, summary_dir: Path):
+    """Checks if a transcript has already been summarised"""
+
+    t = t_path.stem
+
+    s_paths = list(summary_dir.glob("*.json"))
+    summary_names = [s.stem for s in s_paths]
+
+    return any([t == s for s in summary_names])
+
+
 def main():
     load_dotenv()
 
     model = init_model()
 
-    paths = params.transcript_dir.glob("*.txt")
-    path = list(paths)[0]  # TODO: summarise all video or allow user to select
+    paths = list(params.transcript_dir.glob("*.txt"))
+    video_ids = [p.stem.split("vid:")[-1] for p in paths]
+    files = list(zip(video_ids, paths))
 
-    with open(path, mode="r") as f:
-        transcript = [line.strip() for line in f.readlines()]
+    for i, file in enumerate(files):
+        vid, path = file
 
-    transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
+        is_summarised = check_if_summarised(
+            t_path=path, summary_dir=params.summaries_dir
+        )
 
-    if params.LIMIT_TRANSCRIPT is not None:
-        transcripts = transcripts[: params.LIMIT_TRANSCRIPT]
+        if is_summarised:
+            print(f"Video '{path.stem}' has already been summarised")
+            exit()
 
-    # recursively chunk the list & summarise until len(summaries) == 1
-    summaries = []
-    while len(summaries) != 1:
-        for video_transcript in tqdm(transcripts):
-            summary = create_summary(
-                model=model,
-                limit=params.SUMMARY_LIMIT,
-                video_transcript=video_transcript,
-                bullets=params.BULLETS,
-            )
-            summaries.append(summary)
+        print(f"Summarising video '{path.stem}' ...")
 
-        summaries = chunk_a_list(summaries, params.CHUNK_SIZE)
+        with open(path, mode="r") as f:
+            transcript = [line.strip() for line in f.readlines()]
 
-    assert len(summaries) == 1, "You have not created a summary of summaries"
+        transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
 
-    msg = create_summary(
-        model=model,
-        limit=params.SUMMARY_LIMIT,
-        video_transcript=summaries[0],
-        bullets=params.BULLETS,
-    )
+        if params.LIMIT_TRANSCRIPT is not None:
+            transcripts = transcripts[: params.LIMIT_TRANSCRIPT]
 
-    if not params.summaries_path.parent.exists():
-        params.summaries_path.parent.mkdir()
+        # recursively chunk the list & summarise until len(summaries) == 1
+        summaries = []
+        while len(summaries) != 1:
+            for video_transcript in tqdm(transcripts):
+                summary = create_summary(
+                    model=model,
+                    limit=params.SUMMARY_LIMIT,
+                    video_transcript=video_transcript,
+                    bullets=params.BULLETS,
+                )
+                summaries.append(summary)
 
-    with open(params.summaries_path, mode="wb") as f:
-        pickle.dump(msg, f)
+            summaries = chunk_a_list(summaries, params.CHUNK_SIZE)
+
+        assert len(summaries) == 1, "You have not created a summary of summaries"
+
+        msg = create_summary(
+            model=model,
+            limit=params.SUMMARY_LIMIT,
+            video_transcript=summaries[0],
+            bullets=params.BULLETS,
+        )
+
+        video_summary = {"video_id": vid, "summary": msg}
+
+        if not params.summaries_dir.exists():
+            params.summaries_dir.mkdir()
+
+        file_path = params.summaries_dir / f"{paths[i].stem}.json"
+
+        with open(file_path, mode="w") as f:
+            json.dump(video_summary, f)
 
     return msg
 
 
 if __name__ == "__main__":
-    from pprint import pprint
-
     msg = main()
     pprint(msg)
