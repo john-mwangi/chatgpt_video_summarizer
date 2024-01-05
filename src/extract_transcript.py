@@ -1,18 +1,13 @@
 """Extract transcript from a YouTube video"""
 
-# provide youtube url
-# get the video id from the url
-# extract transctipt from youtube video as text file
-# if the transcript is not in english, translate it
-# save text as file with naming convention: channel_name-video_name
-# summarize text using an open source model from hugging face
-
 import json
 import urllib.parse
 import urllib.request
 from pathlib import Path
 
 from youtube_transcript_api import YouTubeTranscriptApi
+
+from .params import transcript_dir
 
 
 def get_video_id(url: str) -> str:
@@ -62,7 +57,7 @@ def save_trancript(transcript: list[str], video_id: str, file_dir: Path) -> None
     if not file_dir.exists():
         file_dir.mkdir()
 
-    with open(f"{file_path}.txt", mode="w") as f:
+    with open(f"{file_path} - vid:{video_id}.txt", mode="w") as f:
         f.writelines(transcript)
 
 
@@ -80,14 +75,19 @@ def convert_video_ts(s: float) -> str:
     return res
 
 
-def main(url: str, dir: Path):
+def main(url: str, dir: Path = transcript_dir):
     video_id = get_video_id(url)
-    transcript = get_video_transcript(video_id)
-    save_trancript(transcript, video_id, dir)
+
+    vids = list(dir.glob("*.txt"))
+    is_downloaded = any([True if v.stem.endswith(video_id) else False for v in vids])
+
+    if is_downloaded:
+        print(f"{video_id=} transcript has already been downloaded")
+    else:
+        transcript = get_video_transcript(video_id)
+        save_trancript(transcript, video_id, dir)
 
 
 if __name__ == "__main__":
-    from params import transcript_dir
-
     URL = "https://www.youtube.com/watch?v=JEBDfGqrAUA"
-    main(URL, transcript_dir)
+    main(URL)
