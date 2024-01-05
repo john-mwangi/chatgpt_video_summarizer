@@ -73,7 +73,7 @@ def main():
     model = init_model()
 
     paths = params.transcript_dir.glob("*.txt")
-    path = list(paths)[0]
+    path = list(paths)[0]  # TODO: summarise all video or allow user to select
 
     with open(path, mode="r") as f:
         transcript = [line.strip() for line in f.readlines()]
