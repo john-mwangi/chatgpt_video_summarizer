@@ -1,30 +1,35 @@
 import pickle
-from pprint import pprint
 
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
-from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
 import params
 
-template = """system: You are a helpful assistant who provides helpful summaries 
-to a video transcript. The format of the video transcript is `timestamp - dialogue`.
 
-user: {question}
-assistant:
-"""
+def init_model():
+    """Initialise an LLM"""
 
-prompt_template = PromptTemplate(
-    input_variables=["conversation_history", "question", "video_transcript"],
-    template=template,
-)
+    template = """system: You are a helpful assistant who provides helpful summaries 
+    to a video transcript. The format of the video transcript is `timestamp - dialogue`.
 
-memory = ConversationBufferMemory(
-    memory_key="conversation_history", ai_prefix="assistant", human_prefix="user"
-)
+    user: {question}
+    assistant:
+    """
+
+    prompt_template = PromptTemplate(
+        input_variables=["conversation_history", "question", "video_transcript"],
+        template=template,
+    )
+
+    model = LLMChain(
+        llm=ChatOpenAI(model="gpt-4-1106-preview"),
+        prompt=prompt_template,
+    )
+
+    return model
 
 
 def chunk_a_list(data: list[str], chunk_size: int) -> list[list[str]]:
@@ -65,10 +70,7 @@ def create_summary(model, limit, video_transcript, bullets) -> str:
 def main():
     load_dotenv()
 
-    model = LLMChain(
-        llm=ChatOpenAI(model="gpt-4-1106-preview"),
-        prompt=prompt_template,
-    )
+    model = init_model()
 
     paths = params.transcript_dir.glob("*.txt")
     path = list(paths)[0]
@@ -110,8 +112,11 @@ def main():
     with open(params.summaries_path, mode="wb") as f:
         pickle.dump(msg, f)
 
-    pprint(msg)
+    return msg
 
 
 if __name__ == "__main__":
-    main()
+    from pprint import pprint
+
+    msg = main()
+    pprint(msg)
