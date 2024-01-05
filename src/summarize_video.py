@@ -72,12 +72,17 @@ def create_summary(model, limit, video_transcript, bullets) -> str:
 def check_if_summarised(t_path: Path, summary_dir: Path):
     """Checks if a transcript has already been summarised"""
 
-    t = t_path.stem
+    t_name = t_path.stem
 
     s_paths = list(summary_dir.glob("*.json"))
     summary_names = [s.stem for s in s_paths]
 
-    return any([t == s for s in summary_names])
+    is_summarised = any([t_name == s_name for s_name in summary_names])
+
+    with open(f"{summary_dir / t_name}.json") as f:
+        summary = json.load(f).get("summary")
+
+    return is_summarised, summary
 
 
 def main():
@@ -92,12 +97,13 @@ def main():
     for i, file in enumerate(files):
         vid, path = file
 
-        is_summarised = check_if_summarised(
+        is_summarised, content = check_if_summarised(
             t_path=path, summary_dir=params.summaries_dir
         )
 
         if is_summarised:
-            print(f"Video '{path.stem}' has already been summarised")
+            print(f"Video '{path.stem}' has already been summarised\n\n")
+            pprint(content)
             exit()
 
         print(f"Summarising video '{path.stem}' ...")
