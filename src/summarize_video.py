@@ -55,10 +55,12 @@ def create_summary(model, limit, video_transcript, bullets) -> str:
 
 if __name__ == "__main__":
     import pickle
+    from pprint import pprint
 
     from dotenv import load_dotenv
     from langchain.chains import LLMChain
     from langchain.chat_models import ChatOpenAI
+    from tqdm import tqdm
 
     import params
 
@@ -83,7 +85,7 @@ if __name__ == "__main__":
     # recursively chunk the list & summarise until len(summaries) == 1
     summaries = []
     while len(summaries) != 1:
-        for video_transcript in transcripts:
+        for video_transcript in tqdm(transcripts):
             summary = create_summary(
                 model=model,
                 limit=params.SUMMARY_LIMIT,
@@ -94,5 +96,10 @@ if __name__ == "__main__":
 
         summaries = chunk_a_list(summaries, params.CHUNK_SIZE)
 
-    with open("summaries.pkl", mode="wb") as f:
+    if not params.summaries_path.parent.exists():
+        params.summaries_path.parent.mkdir()
+
+    with open(params.summaries_path, mode="wb") as f:
         pickle.dump(summaries, f)
+
+    pprint(summaries[0])
