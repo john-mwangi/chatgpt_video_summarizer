@@ -18,13 +18,13 @@ memory = ConversationBufferMemory(
 )
 
 
-def chunk_transcript(transcript: list[str], chunk_size: int) -> list[list[str]]:
-    """Converts a transcript into a smaller chunks"""
+def chunk_a_list(data: list[str], chunk_size: int) -> list[list[str]]:
+    """Converts a long list to a smaller one by combining its items"""
 
     result = []
     sublist = []
 
-    for _, t in enumerate(transcript):
+    for _, t in enumerate(data):
         if t.strip():
             sublist.append(t)
         if len(sublist) == chunk_size:
@@ -82,24 +82,23 @@ if __name__ == "__main__":
     with open(path, mode="r") as f:
         transcript = [line.strip() for line in f.readlines()]
 
-    transcripts = chunk_transcript(transcript, CHUNK_SIZE)
+    transcripts = chunk_a_list(transcript, CHUNK_SIZE)
 
-    # summaries = []
+    # recursively chunk the list & summarise until len(summaries) == 1
+    summaries = []
+    while len(summaries) != 1:
+        for video_transcript in transcripts[:LIMIT_CHUNKS]:
+            summary = create_summary(
+                model=model,
+                limit=SUMMARY_LIMIT,
+                video_transcript=video_transcript,
+                bullets=BULLETS,
+            )
+            summaries.append(summary)
 
-    # for video_transcript in transcripts[:LIMIT_CHUNKS]:
-    #     summary = create_summary(
-    #         model=model,
-    #         limit=SUMMARY_LIMIT,
-    #         video_transcript=video_transcript,
-    #         bullets=BULLETS,
-    #     )
-    #     summaries.append(summary)
+        summaries = chunk_a_list(summaries, CHUNK_SIZE)
 
-    # with open("summaries.pkl", mode="wb") as f:
-    #     pickle.dump(summaries, f)
-
-    with open("summaries.pkl", mode="rb") as f:
-        summaries = pickle.load(f)
+    with open("summaries.pkl", mode="wb") as f:
+        pickle.dump(summaries, f)
 
     breakpoint()
-    batch_summaries = chunk_transcript(transcript=summaries, chunk_size=BATCH_CHUNKS)
