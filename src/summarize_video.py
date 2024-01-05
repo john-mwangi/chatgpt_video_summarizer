@@ -26,7 +26,7 @@ def init_model():
     )
 
     model = LLMChain(
-        llm=ChatOpenAI(model="gpt-4-1106-preview"),
+        llm=ChatOpenAI(model=params.model),
         prompt=prompt_template,
     )
 
