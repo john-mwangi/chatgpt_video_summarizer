@@ -60,14 +60,7 @@ if __name__ == "__main__":
     from langchain.chains import LLMChain
     from langchain.chat_models import ChatOpenAI
 
-    from params import (
-        BATCH_CHUNKS,
-        BULLETS,
-        CHUNK_SIZE,
-        LIMIT_CHUNKS,
-        SUMMARY_LIMIT,
-        transcript_dir,
-    )
+    import params
 
     load_dotenv()
 
@@ -76,27 +69,27 @@ if __name__ == "__main__":
         prompt=prompt_template,
     )
 
-    paths = transcript_dir.glob("*.txt")
+    paths = params.transcript_dir.glob("*.txt")
     path = list(paths)[0]
 
     with open(path, mode="r") as f:
         transcript = [line.strip() for line in f.readlines()]
 
-    transcripts = chunk_a_list(transcript, CHUNK_SIZE)
+    transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
 
     # recursively chunk the list & summarise until len(summaries) == 1
     summaries = []
     while len(summaries) != 1:
-        for video_transcript in transcripts[:LIMIT_CHUNKS]:
+        for video_transcript in transcripts[: params.LIMIT_CHUNKS]:  # TODO: allow None
             summary = create_summary(
                 model=model,
-                limit=SUMMARY_LIMIT,
+                limit=params.SUMMARY_LIMIT,
                 video_transcript=video_transcript,
-                bullets=BULLETS,
+                bullets=params.BULLETS,
             )
             summaries.append(summary)
 
-        summaries = chunk_a_list(summaries, CHUNK_SIZE)
+        summaries = chunk_a_list(summaries, params.CHUNK_SIZE)
 
     with open("summaries.pkl", mode="wb") as f:
         pickle.dump(summaries, f)
