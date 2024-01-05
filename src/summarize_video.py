@@ -77,10 +77,13 @@ if __name__ == "__main__":
 
     transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
 
+    if params.LIMIT_TRANSCRIPT is not None:
+        transcripts = transcripts[: params.LIMIT_TRANSCRIPT]
+
     # recursively chunk the list & summarise until len(summaries) == 1
     summaries = []
     while len(summaries) != 1:
-        for video_transcript in transcripts[: params.LIMIT_CHUNKS]:  # TODO: allow None
+        for video_transcript in transcripts:
             summary = create_summary(
                 model=model,
                 limit=params.SUMMARY_LIMIT,
@@ -93,5 +96,3 @@ if __name__ == "__main__":
 
     with open("summaries.pkl", mode="wb") as f:
         pickle.dump(summaries, f)
-
-    breakpoint()
