@@ -13,7 +13,7 @@ from . import params
 def init_model():
     """Initialise an LLM"""
 
-    template = """system: You are a helpful assistant who provides helpful summaries 
+    template = """system: You are a helpful assistant who provides useful summaries 
     to a video transcript. The format of the video transcript is `timestamp - dialogue`.
 
     user: {question}
@@ -21,7 +21,7 @@ def init_model():
     """
 
     prompt_template = PromptTemplate(
-        input_variables=["conversation_history", "question", "video_transcript"],
+        input_variables=["question"],
         template=template,
     )
 
@@ -87,9 +87,17 @@ def check_if_summarised(t_path: Path, summary_dir: Path):
 
     return is_summarised, summary
 
+def summarize_list_of_transcripts(transcripts, bullets, model, limit):
+    """Summarize a list of transcripts"""
+
+    summaries = [
+        summarize_transcript(transcript, bullets, model, limit)
+        for transcript in tqdm(transcripts)
+    ]
+    return summaries
 
 def summarize_chunked_summaries(summaries, chunk_size, bullets, model, limit):
-    """Create summary of summaries"""
+    """Create a list of summaries"""
 
     # list of lists / list of transcript summaries
     chunked_summaries = [
@@ -104,16 +112,6 @@ def summarize_chunked_summaries(summaries, chunk_size, bullets, model, limit):
 
     # join together and send to model
     return summarize_transcript(" ".join(combined_summaries), bullets, model, limit)
-
-
-def summarize_list_of_transcripts(transcripts, bullets, model, limit):
-    """Summarize a list of transcripts"""
-
-    summaries = [
-        summarize_transcript(transcript, bullets, model, limit)
-        for transcript in tqdm(transcripts)
-    ]
-    return summaries
 
 
 def main():
