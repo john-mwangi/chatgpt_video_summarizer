@@ -50,6 +50,7 @@ def chunk_a_list(data: list[str], chunk_size: int) -> list[list[str]]:
 
     return result
 
+
 def check_if_summarised(t_path: Path, summary_dir: Path):
     """Checks if a transcript has already been summarised"""
 
@@ -69,6 +70,7 @@ def check_if_summarised(t_path: Path, summary_dir: Path):
 
     return is_summarised, summary
 
+
 def summarize_transcript(transcript, bullets, model, limit) -> str:
     """Provides a summary for a video transcript"""
 
@@ -85,6 +87,7 @@ def summarize_transcript(transcript, bullets, model, limit) -> str:
     summary = model.predict(question=question)
     return summary
 
+
 def summarize_list_of_transcripts(transcripts, bullets, model, limit):
     """Summarize a list of transcripts into a list of summaries"""
 
@@ -94,21 +97,22 @@ def summarize_list_of_transcripts(transcripts, bullets, model, limit):
     ]
     return summaries
 
+
 def summarize_list_of_summaries(summaries, chunk_size, bullets, model, limit):
     """Summarise a list of summaries into a summary"""
 
-    # list of lists / list of transcript summaries
+    # group list of summaries into chunks
     chunked_summaries = [
         summaries[i : i + chunk_size] for i in range(0, len(summaries), chunk_size)
     ]
 
-    # join list contents into a single prompt/string and send to model
+    # join chunks into a single prompt/string and send to model
     combined_summaries = [
         summarize_transcript(" ".join(chunk), bullets, model, limit)
         for chunk in tqdm(chunked_summaries)
     ]
 
-    # join together and send to model
+    # repeat
     return summarize_transcript(" ".join(combined_summaries), bullets, model, limit)
 
 
