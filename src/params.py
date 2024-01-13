@@ -9,7 +9,7 @@ SUMMARY_LIMIT = 150
 BULLETS = 5
 BATCH_CHUNKS = 2
 
-# Use one of the following values
+# Use one of the following values for `LIMIT_TRANSCRIPT`
 # None to process entire video transcript
 # (0-1) for a proportion of the transcript
 # >=1 for a hardcorded number of transcript lines
