@@ -7,7 +7,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
-from . import params
+from .configs import Settings, summaries_dir, transcript_dir
 
 
 def init_model():
@@ -26,7 +26,7 @@ def init_model():
     )
 
     model = LLMChain(
-        llm=ChatOpenAI(model=params.model),
+        llm=ChatOpenAI(model=Settings.load().model),
         prompt=prompt_template,
     )
 
@@ -122,16 +122,14 @@ def main():
     model = init_model()
     msgs = []
 
-    paths = list(params.transcript_dir.glob("*.txt"))
+    paths = list(transcript_dir.glob("*.txt"))
     video_ids = [p.stem.split("vid:")[-1] for p in paths]
     files = list(zip(video_ids, paths))
 
     for i, file in enumerate(files):
         vid, path = file
 
-        is_summarised, msg = check_if_summarised(
-            t_path=path, summary_dir=params.summaries_dir
-        )
+        is_summarised, msg = check_if_summarised(t_path=path, summary_dir=summaries_dir)
 
         if is_summarised:
             print(f"Video '{path.stem}' has already been summarised")
@@ -144,13 +142,15 @@ def main():
                 transcript = [line.strip() for line in f.readlines()]
 
             # Chunk the entire transcript into list of lines
-            transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
+            transcripts = chunk_a_list(transcript, Settings.load().CHUNK_SIZE)
 
-            if (params.LIMIT_TRANSCRIPT is not None) & (params.LIMIT_TRANSCRIPT > 1):
-                transcripts = transcripts[: params.LIMIT_TRANSCRIPT]
+            if (Settings.load().LIMIT_TRANSCRIPT is not None) & (
+                Settings.load().LIMIT_TRANSCRIPT > 1
+            ):
+                transcripts = transcripts[: Settings.load().LIMIT_TRANSCRIPT]
 
-            elif params.LIMIT_TRANSCRIPT <= 1:
-                length = len(transcripts) * params.LIMIT_TRANSCRIPT
+            elif Settings.load().LIMIT_TRANSCRIPT <= 1:
+                length = len(transcripts) * Settings.load().LIMIT_TRANSCRIPT
                 transcripts = transcripts[: int(length)]
 
             else:
@@ -159,7 +159,10 @@ def main():
             # Summary of summaries: recursively chunk the list & summarise until len(summaries) == 1
             # Summarize each transcript
             list_of_summaries = summarize_list_of_transcripts(
-                transcripts, params.BULLETS, model, params.SUMMARY_LIMIT
+                transcripts,
+                Settings.load().BULLETS,
+                model,
+                Settings.load().SUMMARY_LIMIT,
             )
 
             # Combine summaries in chunks and summarize them iteratively until a single summary is obtained
@@ -167,10 +170,10 @@ def main():
                 list_of_summaries = [
                     summarize_list_of_summaries(
                         list_of_summaries,
-                        params.CHUNK_SIZE,
-                        params.BULLETS,
+                        Settings.load().CHUNK_SIZE,
+                        Settings.load().BULLETS,
                         model,
-                        params.SUMMARY_LIMIT,
+                        Settings.load().SUMMARY_LIMIT,
                     )
                 ]
 
@@ -178,12 +181,15 @@ def main():
             assert len(list_of_summaries) == 1, "Not a summary of summaries"
             msg = list_of_summaries[0]
 
-            video_summary = {"video_id": vid, "summary": msg}
+            video_summary = {
+                "video_id": vid,
+                "summary": msg,
+            }
 
-            if not params.summaries_dir.exists():
-                params.summaries_dir.mkdir()
+            if not Settings.load().summaries_dir.exists():
+                Settings.load().summaries_dir.mkdir()
 
-            file_path = params.summaries_dir / f"{paths[i].stem}.json"
+            file_path = Settings.load().summaries_dir / f"{paths[i].stem}.json"
 
             with open(file_path, mode="w") as f:
                 json.dump(video_summary, f)
