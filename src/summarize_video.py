@@ -146,10 +146,10 @@ def main():
             # Chunk the entire transcript into list of lines
             transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
 
-            if (params.LIMIT_TRANSCRIPT is not None) & (params.LIMIT_TRANSCRIPT >= 1):
+            if (params.LIMIT_TRANSCRIPT is not None) & (params.LIMIT_TRANSCRIPT > 1):
                 transcripts = transcripts[: params.LIMIT_TRANSCRIPT]
 
-            elif params.LIMIT_TRANSCRIPT < 1:
+            elif params.LIMIT_TRANSCRIPT <= 1:
                 length = len(transcripts) * params.LIMIT_TRANSCRIPT
                 transcripts = transcripts[: int(length)]
 
