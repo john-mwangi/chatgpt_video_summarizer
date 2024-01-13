@@ -1,6 +1,6 @@
 # Video Summarizer
 ## About
-This tool uses ChatGPT to summarise a YouTube video. 
+This tool uses ChatGPT to summarise a YouTube video by providing either a YouTube channel or the video link.
 
 It will provide a brief 150 word summary of the video as well as the top 5 main points in the video.
 The main points are timestamped so that it's easy to navigate the video where
