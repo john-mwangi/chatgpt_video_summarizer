@@ -16,7 +16,7 @@ a portion of the video - the first 25% of the video being the default.
 ## Usage
 - Update params (optional)
 - Run `main.py`
-- Video summaries will be saved under: `files/summaries/`
+- Video summaries will be saved under: `video-summarizer/files/summaries/`
 
 ## Sample summary
 ![Sample video summary](./Screenshot.png)
