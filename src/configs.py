@@ -7,7 +7,7 @@ PKG_DIR = Path(__file__).parent.parent.resolve()
 transcript_dir = PKG_DIR / "files/transcripts"
 summaries_dir = PKG_DIR / "files/summaries"
 params_path = PKG_DIR / "src/params.yaml"
-video_urls_path = PKG_DIR / "src/video_urls.yaml"
+video_urls_path = PKG_DIR / "video_urls.yaml"
 
 
 class Params(BaseSettings):
