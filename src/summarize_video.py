@@ -13,7 +13,7 @@ from . import params
 def init_model():
     """Initialise an LLM"""
 
-    template = """system: You are a helpful assistant who provides helpful summaries 
+    template = """system: You are a helpful assistant who provides useful summaries 
     to a video transcript. The format of the video transcript is `timestamp - dialogue`.
 
     user: {question}
@@ -21,7 +21,7 @@ def init_model():
     """
 
     prompt_template = PromptTemplate(
-        input_variables=["conversation_history", "question", "video_transcript"],
+        input_variables=["question"],
         template=template,
     )
 
@@ -51,23 +51,6 @@ def chunk_a_list(data: list[str], chunk_size: int) -> list[list[str]]:
     return result
 
 
-def summarize_transcript(transcript, bullets, model, limit) -> str:
-    """Provides a summary for a video transcript"""
-
-    question = f"""Consider the following video transcript: 
-    
-    {transcript} 
-    
-    Begin by providing a concise single sentence summary of the what 
-    is being discussed in the transcript. Then follow it with bullet 
-    points of the {bullets} most important points along with their associated 
-    timestamps. The total number of words should not be more than {limit}.
-    """
-
-    summary = model.predict(question=question)
-    return summary
-
-
 def check_if_summarised(t_path: Path, summary_dir: Path):
     """Checks if a transcript has already been summarised"""
 
@@ -88,32 +71,49 @@ def check_if_summarised(t_path: Path, summary_dir: Path):
     return is_summarised, summary
 
 
-def summarize_chunked_summaries(summaries, chunk_size, bullets, model, limit):
-    """Create summary of summaries"""
+def summarize_transcript(transcript, bullets, model, limit) -> str:
+    """Provides a summary for a video transcript"""
 
-    # list of lists / list of transcript summaries
-    chunked_summaries = [
-        summaries[i : i + chunk_size] for i in range(0, len(summaries), chunk_size)
-    ]
+    question = f"""Consider the following video transcript: 
+    
+    {transcript} 
+    
+    Begin by providing a concise single sentence summary of the what 
+    is being discussed in the transcript. Then follow it with bullet 
+    points of the {bullets} most important points along with their associated 
+    timestamps. The total number of words should not be more than {limit}.
+    """
 
-    # join list contents into a single prompt/string and send to model
-    combined_summaries = [
-        summarize_transcript(" ".join(chunk), bullets, model, limit)
-        for chunk in tqdm(chunked_summaries)
-    ]
-
-    # join together and send to model
-    return summarize_transcript(" ".join(combined_summaries), bullets, model, limit)
+    summary = model.predict(question=question)
+    return summary
 
 
 def summarize_list_of_transcripts(transcripts, bullets, model, limit):
-    """Summarize a list of transcripts"""
+    """Summarize a list of transcripts into a list of summaries"""
 
     summaries = [
         summarize_transcript(transcript, bullets, model, limit)
         for transcript in tqdm(transcripts)
     ]
     return summaries
+
+
+def summarize_list_of_summaries(summaries, chunk_size, bullets, model, limit):
+    """Summarise a list of summaries into a summary"""
+
+    # group list of summaries into chunks
+    chunked_summaries = [
+        summaries[i : i + chunk_size] for i in range(0, len(summaries), chunk_size)
+    ]
+
+    # join chunks into a single prompt/string and send to model
+    combined_summaries = [
+        summarize_transcript(" ".join(chunk), bullets, model, limit)
+        for chunk in tqdm(chunked_summaries)
+    ]
+
+    # repeat
+    return summarize_transcript(" ".join(combined_summaries), bullets, model, limit)
 
 
 def main():
@@ -146,10 +146,10 @@ def main():
             # Chunk the entire transcript into list of lines
             transcripts = chunk_a_list(transcript, params.CHUNK_SIZE)
 
-            if (params.LIMIT_TRANSCRIPT is not None) & (params.LIMIT_TRANSCRIPT >= 1):
+            if (params.LIMIT_TRANSCRIPT is not None) & (params.LIMIT_TRANSCRIPT > 1):
                 transcripts = transcripts[: params.LIMIT_TRANSCRIPT]
 
-            elif params.LIMIT_TRANSCRIPT < 1:
+            elif params.LIMIT_TRANSCRIPT <= 1:
                 length = len(transcripts) * params.LIMIT_TRANSCRIPT
                 transcripts = transcripts[: int(length)]
 
@@ -165,7 +165,7 @@ def main():
             # Combine summaries in chunks and summarize them iteratively until a single summary is obtained
             while len(list_of_summaries) > 1:
                 list_of_summaries = [
-                    summarize_chunked_summaries(
+                    summarize_list_of_summaries(
                         list_of_summaries,
                         params.CHUNK_SIZE,
                         params.BULLETS,
