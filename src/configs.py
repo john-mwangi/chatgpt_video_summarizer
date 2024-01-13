@@ -9,7 +9,7 @@ summaries_dir = ROOT_DIR / "files/summaries"
 params_path = ROOT_DIR / "src/params.yaml"
 
 
-class Settings(BaseSettings):
+class Params(BaseSettings):
     model: str
     CHUNK_SIZE: int
     SUMMARY_LIMIT: int
@@ -21,10 +21,10 @@ class Settings(BaseSettings):
         with open(path, mode="r") as f:
             params = yaml.safe_load(f)
 
-        return Settings(**params)
+        return Params(**params)
 
 
 if __name__ == "__main__":
-    print(Settings.load().BATCH_CHUNKS)
-    print(Settings.load())
-    print(dict(Settings.load()))
+    print(Params.load().BATCH_CHUNKS)
+    print(Params.load())
+    print(dict(Params.load()))

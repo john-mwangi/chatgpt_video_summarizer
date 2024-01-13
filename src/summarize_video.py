@@ -7,7 +7,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
-from .configs import Settings, summaries_dir, transcript_dir
+from .configs import Params, summaries_dir, transcript_dir
 
 
 def init_model():
@@ -26,7 +26,7 @@ def init_model():
     )
 
     model = LLMChain(
-        llm=ChatOpenAI(model=Settings.load().model),
+        llm=ChatOpenAI(model=Params.load().model),
         prompt=prompt_template,
     )
 
@@ -142,15 +142,15 @@ def main():
                 transcript = [line.strip() for line in f.readlines()]
 
             # Chunk the entire transcript into list of lines
-            transcripts = chunk_a_list(transcript, Settings.load().CHUNK_SIZE)
+            transcripts = chunk_a_list(transcript, Params.load().CHUNK_SIZE)
 
-            if (Settings.load().LIMIT_TRANSCRIPT is not None) & (
-                Settings.load().LIMIT_TRANSCRIPT > 1
+            if (Params.load().LIMIT_TRANSCRIPT is not None) & (
+                Params.load().LIMIT_TRANSCRIPT > 1
             ):
-                transcripts = transcripts[: Settings.load().LIMIT_TRANSCRIPT]
+                transcripts = transcripts[: Params.load().LIMIT_TRANSCRIPT]
 
-            elif Settings.load().LIMIT_TRANSCRIPT <= 1:
-                length = len(transcripts) * Settings.load().LIMIT_TRANSCRIPT
+            elif Params.load().LIMIT_TRANSCRIPT <= 1:
+                length = len(transcripts) * Params.load().LIMIT_TRANSCRIPT
                 transcripts = transcripts[: int(length)]
 
             else:
@@ -160,9 +160,9 @@ def main():
             # Summarize each transcript
             list_of_summaries = summarize_list_of_transcripts(
                 transcripts,
-                Settings.load().BULLETS,
+                Params.load().BULLETS,
                 model,
-                Settings.load().SUMMARY_LIMIT,
+                Params.load().SUMMARY_LIMIT,
             )
 
             # Combine summaries in chunks and summarize them iteratively until a single summary is obtained
@@ -170,10 +170,10 @@ def main():
                 list_of_summaries = [
                     summarize_list_of_summaries(
                         list_of_summaries,
-                        Settings.load().CHUNK_SIZE,
-                        Settings.load().BULLETS,
+                        Params.load().CHUNK_SIZE,
+                        Params.load().BULLETS,
                         model,
-                        Settings.load().SUMMARY_LIMIT,
+                        Params.load().SUMMARY_LIMIT,
                     )
                 ]
 
@@ -184,7 +184,7 @@ def main():
             video_summary = {
                 "video_id": vid,
                 "summary": msg,
-                "params": dict(Settings.load()),
+                "params": dict(Params.load()),
             }
 
             if not summaries_dir.exists():
