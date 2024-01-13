@@ -39,28 +39,36 @@ def load_urls(video_urls: dict, sort_by: str = "newest") -> list[str]:
     """
 
     top_n = video_urls.get("top_n")
+    channels = video_urls.get("channels")
 
-    for k in video_urls.keys():
-        if k == "channels":
-            for channel in video_urls.get("channels"):
-                urls = get_videos_from_channel(
-                    channel_url=channel, top_n=top_n, sort_by=sort_by
-                )
-        if k == "videos":
-            v_urls = video_urls.get("videos")
+    if channels is not None:
+        for channel in channels:
+            urls = get_videos_from_channel(
+                channel_url=channel, top_n=top_n, sort_by=sort_by
+            )
 
-    urls.extend(v_urls)
+    v_urls = video_urls.get("videos")
 
-    return urls
+    if channels is None and v_urls is not None:
+        return v_urls
+    elif v_urls is None and channels is not None:
+        return urls
+    elif channels is None and v_urls is None:
+        raise ValueError("Update video_urls.yaml")
+    else:
+        urls.extend(v_urls)
+        return set(urls)
 
 
 def main():
     with open(video_urls_path, "r") as f:
         video_urls = yaml.safe_load(f)
 
-    urls = load_urls(video_urls)
+    yt_urls = load_urls(video_urls)
 
-    for url in urls:
+    print("YouTube video urls to summarise:", yt_urls)
+
+    for url in yt_urls:
         extract_main(url=url)
 
     msgs = summarise_main()
