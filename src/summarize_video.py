@@ -184,12 +184,13 @@ def main():
             video_summary = {
                 "video_id": vid,
                 "summary": msg,
+                "params": dict(Settings.load()),
             }
 
-            if not Settings.load().summaries_dir.exists():
-                Settings.load().summaries_dir.mkdir()
+            if not summaries_dir.exists():
+                summaries_dir.mkdir()
 
-            file_path = Settings.load().summaries_dir / f"{paths[i].stem}.json"
+            file_path = summaries_dir / f"{paths[i].stem}.json"
 
             with open(file_path, mode="w") as f:
                 json.dump(video_summary, f)
