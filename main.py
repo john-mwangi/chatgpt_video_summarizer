@@ -25,7 +25,7 @@ def get_videos_from_channel(channel_url: str, sort_by: str, top_n: int) -> list[
     return [f"https://www.youtube.com/watch?v={v}" for v in vids]
 
 
-def load_urls(video_urls: dict, sort_by: str = "newest") -> list[str]:
+def load_urls(video_urls: dict, sort_by: str) -> list[str]:
     """Loads videos defined in a config file
 
     Args:
@@ -64,9 +64,11 @@ def main():
     with open(video_urls_path, "r") as f:
         video_urls = yaml.safe_load(f)
 
-    yt_urls = load_urls(video_urls)
+    sort_by = video_urls["sort_by"]
+    yt_urls = load_urls(video_urls, sort_by=sort_by)
 
-    print("YouTube video urls to summarise:", yt_urls)
+    print("Sorting YouTube videos by:", sort_by)
+    print("Videos to summarise:", yt_urls)
 
     for url in yt_urls:
         extract_main(url=url)
