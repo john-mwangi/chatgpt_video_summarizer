@@ -7,7 +7,7 @@ from pathlib import Path
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from .params import transcript_dir
+from .configs import transcript_dir
 
 
 def get_video_id(url: str) -> str:
