@@ -25,7 +25,7 @@ def get_videos_from_channel(channel_url: str, sort_by: str, top_n: int) -> list[
     return [f"https://www.youtube.com/watch?v={v}" for v in vids]
 
 
-def load_urls(top_n: int = 2, sort_by: str = "newest") -> list[str]:
+def load_urls(video_urls: dict, sort_by: str = "newest") -> list[str]:
     """Loads videos defined in a config file
 
     Args:
@@ -38,8 +38,7 @@ def load_urls(top_n: int = 2, sort_by: str = "newest") -> list[str]:
     list of YouTube video urls
     """
 
-    with open(video_urls_path, "r") as f:
-        video_urls = yaml.safe_load(f)
+    top_n = video_urls.get("top_n")
 
     for k in video_urls.keys():
         if k == "channels":
@@ -55,13 +54,21 @@ def load_urls(top_n: int = 2, sort_by: str = "newest") -> list[str]:
     return urls
 
 
-if __name__ == "__main__":
-    urls = load_urls()
+def main():
+    with open(video_urls_path, "r") as f:
+        video_urls = yaml.safe_load(f)
+
+    urls = load_urls(video_urls)
 
     for url in urls:
         extract_main(url=url)
 
     msgs = summarise_main()
+    return msgs
+
+
+if __name__ == "__main__":
+    msgs = main()
     for msg in msgs:
         pprint(msg)
         print("\n\n")
