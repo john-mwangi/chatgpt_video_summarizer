@@ -49,22 +49,38 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str]:
 
     v_urls = video_urls.get("videos")
 
-    if channels is None and v_urls is not None:
+    if (channels is None) | (len(channels) == 0) and v_urls is not None:
         return v_urls
-    elif v_urls is None and channels is not None:
+    elif (v_urls is None) | (len(v_urls) == 0) and channels is not None:
         return urls
-    elif channels is None and v_urls is None:
+    elif (channels is None) | (len(channels) == 0) and (v_urls is None) | (
+        len(v_urls) == 0
+    ):
         raise ValueError("Update video_urls.yaml")
     else:
         urls.extend(v_urls)
         return set(urls)
 
 
-def main():
-    with open(video_urls_path, "r") as f:
-        video_urls = yaml.safe_load(f)
+def main(
+    channels: list = None,
+    videos: list = None,
+    LIMIT_TRANSCRIPT: int | float | None = 0.25,
+    top_n: int = 2,
+    sort_by: str = "newest",
+):
+    """
+    Use one of the following values for `LIMIT_TRANSCRIPT_`
+    None to process entire video transcript
+    (0-1) for a proportion of the transcript
+    >=1 for a hardcorded number of transcript lines
+    """
 
-    sort_by = video_urls["sort_by"]
+    video_urls = {}
+    video_urls["channels"] = channels
+    video_urls["videos"] = videos
+    video_urls["top_n"] = top_n
+
     yt_urls = load_urls(video_urls, sort_by=sort_by)
 
     print("Sorting YouTube videos by:", sort_by)
@@ -73,12 +89,21 @@ def main():
     for url in yt_urls:
         extract_main(url=url)
 
-    msgs = summarise_main()
+    msgs = summarise_main(LIMIT_TRANSCRIPT)
     return msgs
 
 
 if __name__ == "__main__":
-    msgs = main()
+    channels = [
+        "https://www.youtube.com/@ArjanCodes",
+        "https://www.youtube.com/@CBSNews",
+    ]
+    videos = [
+        "https://www.youtube.com/watch?v=JEBDfGqrAUA",
+        "https://www.youtube.com/watch?v=TRjq7t2Ms5I",
+    ]
+
+    msgs = main(channels, videos)
     for msg in msgs:
         pprint(msg)
         print("\n\n")
