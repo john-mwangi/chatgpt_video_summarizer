@@ -16,7 +16,6 @@ class Params(BaseSettings):
     SUMMARY_LIMIT: int
     BULLETS: int
     BATCH_CHUNKS: int
-    LIMIT_TRANSCRIPT: None | float | int
 
     def load(path: Path = params_path):
         with open(path, mode="r") as f:
