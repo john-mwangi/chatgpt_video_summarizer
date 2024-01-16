@@ -7,7 +7,7 @@ from main import main
 class VideoUrls(BaseModel):
     channels: list[str]
     videos: list[str]
-    LIMIT_TRANSCRIPT: float | int | None = 0.25
+    limit_transcript: float | int | None = 0.25
     top_n: int = 2
     sort_by: str = "newest"
 
@@ -20,7 +20,7 @@ def fetch_video_summary(video_urls: VideoUrls):
     summaries = main(
         channels=video_urls.channels,
         videos=video_urls.videos,
-        LIMIT_TRANSCRIPT=video_urls.LIMIT_TRANSCRIPT,
+        LIMIT_TRANSCRIPT=video_urls.limit_transcript,
         sort_by=video_urls.sort_by,
     )
 
