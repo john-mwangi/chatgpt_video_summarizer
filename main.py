@@ -1,9 +1,7 @@
 from pprint import pprint
 
-import yaml
 from scrapetube import get_channel
 
-from src.configs import video_urls_path
 from src.extract_transcript import main as extract_main
 from src.summarize_video import main as summarise_main
 
