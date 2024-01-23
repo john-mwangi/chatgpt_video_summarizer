@@ -1,5 +1,15 @@
-model: gpt-4-1106-preview
-CHUNK_SIZE: 10
-SUMMARY_LIMIT: 150
-BULLETS: 5
-BATCH_CHUNKS: 2
+model_params:
+  MODEL: gpt-4-1106-preview
+  CHUNK_SIZE: 10
+  SUMMARY_LIMIT: 150
+  BULLETS: 5
+  BATCH_CHUNKS: 2
+responses:
+  NOT_FOUND:
+    URL_NOT_FOUND: "The video or channel url does not exist"
+  ERROR:
+    VIDEO_NOT_SUMMARISED: "The video could not be summarised"
+  SUMMARISED:
+    VIDEO_ALREADY_SUMMARISED: "The video was already previously summarised"
+  SUCCESS:
+    VIDEO_SUMMARISED_SUCCESSFULLY: "The video was successfully summarised using AI"

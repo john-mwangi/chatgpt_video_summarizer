@@ -11,7 +11,7 @@ video_urls_path = PKG_DIR / "video_urls.yaml"
 
 
 class Params(BaseSettings):
-    model: str
+    MODEL: str
     CHUNK_SIZE: int
     SUMMARY_LIMIT: int
     BULLETS: int
@@ -19,7 +19,7 @@ class Params(BaseSettings):
 
     def load(path: Path = params_path):
         with open(path, mode="r") as f:
-            params = yaml.safe_load(f)
+            params = yaml.safe_load(f).get("model_params")
 
         return Params(**params)
 
