@@ -1,11 +1,13 @@
-model: gpt-4-1106-preview
-CHUNK_SIZE: 10
-SUMMARY_LIMIT: 150
-BULLETS: 5
-BATCH_CHUNKS: 2
-
-# Use one of the following values for `LIMIT_TRANSCRIPT_`
-# None to process entire video transcript
-# (0-1) for a proportion of the transcript
-# >=1 for a hardcorded number of transcript lines
-LIMIT_TRANSCRIPT: 0.25
+model_params:
+  MODEL: gpt-4-1106-preview
+  CHUNK_SIZE: 10
+  SUMMARY_LIMIT: 150
+  BULLETS: 5
+  BATCH_CHUNKS: 2
+responses:
+  ERROR:
+    status: VIDEO_NOT_SUMMARISED
+    message: "The video could not be summarised"
+  SUCCESS:
+    status: VIDEO_SUMMARISED_SUCCESSFULLY
+    message: "The video was successfully summarised using AI"
