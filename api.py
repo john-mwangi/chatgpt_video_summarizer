@@ -1,7 +1,10 @@
+import yaml
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from main import main
+from src.configs import params_path, statuses
 
 
 class VideoUrls(BaseModel):
@@ -17,6 +20,9 @@ app = FastAPI()
 
 @app.post(path="/summarize_video")
 def fetch_video_summary(video_urls: VideoUrls):
+    with open(params_path, "r") as f:
+        responses = yaml.safe_load(f).get("responses")
+
     summaries = main(
         channels=video_urls.channels,
         videos=video_urls.videos,
@@ -25,9 +31,7 @@ def fetch_video_summary(video_urls: VideoUrls):
     )
 
     data = {"summaries": summaries}
+    status = responses.get("SUCCESS")
+    status_code = statuses.SUCCESS.value
 
-    return {
-        "data": data,
-        "status": "SUCCESS",
-        "message": "Video was successfully summarised",
-    }
+    return JSONResponse(content={**data, **status}, status_code=status_code)

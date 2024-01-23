@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 
 import yaml
@@ -8,6 +9,12 @@ transcript_dir = PKG_DIR / "files/transcripts"
 summaries_dir = PKG_DIR / "files/summaries"
 params_path = PKG_DIR / "src/params.yaml"
 video_urls_path = PKG_DIR / "video_urls.yaml"
+
+
+class statuses(Enum):
+    SUCCESS = 200
+    ERROR = 400
+    NOT_FOUND = 404
 
 
 class Params(BaseSettings):
