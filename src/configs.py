@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 
 import yaml
@@ -10,17 +11,22 @@ params_path = PKG_DIR / "src/params.yaml"
 video_urls_path = PKG_DIR / "video_urls.yaml"
 
 
+class statuses(Enum):
+    SUCCESS = 200
+    ERROR = 400
+    NOT_FOUND = 404
+
+
 class Params(BaseSettings):
-    model: str
+    MODEL: str
     CHUNK_SIZE: int
     SUMMARY_LIMIT: int
     BULLETS: int
     BATCH_CHUNKS: int
-    LIMIT_TRANSCRIPT: None | float | int
 
     def load(path: Path = params_path):
         with open(path, mode="r") as f:
-            params = yaml.safe_load(f)
+            params = yaml.safe_load(f).get("model_params")
 
         return Params(**params)
 

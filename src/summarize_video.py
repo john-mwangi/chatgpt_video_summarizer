@@ -26,7 +26,7 @@ def init_model():
     )
 
     model = LLMChain(
-        llm=ChatOpenAI(model=Params.load().model),
+        llm=ChatOpenAI(model=Params.load().MODEL),
         prompt=prompt_template,
     )
 
@@ -116,7 +116,7 @@ def summarize_list_of_summaries(summaries, chunk_size, bullets, model, limit):
     return summarize_transcript(" ".join(combined_summaries), bullets, model, limit)
 
 
-def main():
+def main(LIMIT_TRANSCRIPT: int | float | None):
     load_dotenv()
 
     model = init_model()
@@ -144,13 +144,11 @@ def main():
             # Chunk the entire transcript into list of lines
             transcripts = chunk_a_list(transcript, Params.load().CHUNK_SIZE)
 
-            if (Params.load().LIMIT_TRANSCRIPT is not None) & (
-                Params.load().LIMIT_TRANSCRIPT > 1
-            ):
-                transcripts = transcripts[: Params.load().LIMIT_TRANSCRIPT]
+            if (LIMIT_TRANSCRIPT is not None) & (LIMIT_TRANSCRIPT > 1):
+                transcripts = transcripts[:LIMIT_TRANSCRIPT]
 
-            elif Params.load().LIMIT_TRANSCRIPT <= 1:
-                length = len(transcripts) * Params.load().LIMIT_TRANSCRIPT
+            elif LIMIT_TRANSCRIPT <= 1:
+                length = len(transcripts) * LIMIT_TRANSCRIPT
                 transcripts = transcripts[: int(length)]
 
             else:
