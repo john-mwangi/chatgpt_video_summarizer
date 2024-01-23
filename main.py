@@ -37,23 +37,21 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str]:
     """
 
     top_n = video_urls.get("top_n")
-    channels = video_urls.get("channels")
+    channels = video_urls.get("channels", [])
 
-    if channels is not None:
+    if len(channels) > 0:
         for channel in channels:
             urls = get_videos_from_channel(
                 channel_url=channel, top_n=top_n, sort_by=sort_by
             )
 
-    v_urls = video_urls.get("videos")
+    v_urls = video_urls.get("videos", [])
 
-    if (channels is None) | (len(channels) == 0) and v_urls is not None:
+    if len(channels) == 0 and len(v_urls) > 0:
         return v_urls
-    elif (v_urls is None) | (len(v_urls) == 0) and channels is not None:
+    elif len(v_urls) == 0 and len(channels) > 0:
         return urls
-    elif (channels is None) | (len(channels) == 0) and (v_urls is None) | (
-        len(v_urls) == 0
-    ):
+    elif len(channels) == 0 and len(v_urls) == 0:
         raise ValueError("Update video_urls.yaml")
     else:
         urls.extend(v_urls)
@@ -61,8 +59,8 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str]:
 
 
 def main(
-    channels: list = None,
-    videos: list = None,
+    channels: list = [],
+    videos: list = [],
     LIMIT_TRANSCRIPT: int | float | None = 0.25,
     top_n: int = 2,
     sort_by: str = "newest",
