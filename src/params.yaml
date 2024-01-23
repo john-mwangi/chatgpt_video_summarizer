@@ -5,11 +5,9 @@ model_params:
   BULLETS: 5
   BATCH_CHUNKS: 2
 responses:
-  NOT_FOUND:
-    URL_NOT_FOUND: "The video or channel url does not exist"
   ERROR:
-    VIDEO_NOT_SUMMARISED: "The video could not be summarised"
-  SUMMARISED:
-    VIDEO_ALREADY_SUMMARISED: "The video was already previously summarised"
+    status: VIDEO_NOT_SUMMARISED
+    message: "The video could not be summarised"
   SUCCESS:
-    VIDEO_SUMMARISED_SUCCESSFULLY: "The video was successfully summarised using AI"
+    status: VIDEO_SUMMARISED_SUCCESSFULLY
+    message: "The video was successfully summarised using AI"
