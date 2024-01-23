@@ -8,8 +8,8 @@ from src.configs import params_path, statuses
 
 
 class VideoUrls(BaseModel):
-    channels: list[str]
-    videos: list[str]
+    channels: list[str] = []
+    videos: list[str] = []
     limit_transcript: float | int | None = 0.25
     top_n: int = 2
     sort_by: str = "newest"
@@ -38,6 +38,6 @@ def fetch_video_summary(video_urls: VideoUrls):
     except Exception as e:
         data = {"summaries": None}
         status = responses.get("ERROR")
-        status = statuses.ERROR
+        status_code = statuses.ERROR.value
 
     return JSONResponse(content={**data, **status}, status_code=status_code)
