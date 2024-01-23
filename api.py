@@ -23,15 +23,21 @@ def fetch_video_summary(video_urls: VideoUrls):
     with open(params_path, "r") as f:
         responses = yaml.safe_load(f).get("responses")
 
-    summaries = main(
-        channels=video_urls.channels,
-        videos=video_urls.videos,
-        LIMIT_TRANSCRIPT=video_urls.limit_transcript,
-        sort_by=video_urls.sort_by,
-    )
+    try:
+        summaries = main(
+            channels=video_urls.channels,
+            videos=video_urls.videos,
+            LIMIT_TRANSCRIPT=video_urls.limit_transcript,
+            sort_by=video_urls.sort_by,
+        )
 
-    data = {"summaries": summaries}
-    status = responses.get("SUCCESS")
-    status_code = statuses.SUCCESS.value
+        data = {"summaries": summaries}
+        status = responses.get("SUCCESS")
+        status_code = statuses.SUCCESS.value
+
+    except Exception as e:
+        data = {"summaries": None}
+        status = responses.get("ERROR")
+        status = statuses.ERROR
 
     return JSONResponse(content={**data, **status}, status_code=status_code)
