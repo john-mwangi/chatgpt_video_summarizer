@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "video-summarizer"
+name = "video_summarizer"
 version = "0.1.0"
 description = ""
 authors = ["John Mwangi <mail.mwangi@gmail.com>"]

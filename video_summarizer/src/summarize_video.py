@@ -7,7 +7,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
-from .configs import Params, summaries_dir, transcript_dir
+from video_summarizer.configs.configs import Params, summaries_dir, transcript_dir
 
 
 def init_model():

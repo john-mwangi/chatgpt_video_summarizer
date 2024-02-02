@@ -2,8 +2,8 @@ from pprint import pprint
 
 from scrapetube import get_channel
 
-from src.extract_transcript import main as extract_main
-from src.summarize_video import main as summarise_main
+from video_summarizer.src.extract_transcript import main as extract_main
+from video_summarizer.src.summarize_video import main as summarise_main
 
 
 def get_videos_from_channel(channel_url: str, sort_by: str, top_n: int) -> list[str]:
