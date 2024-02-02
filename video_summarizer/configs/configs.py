@@ -4,11 +4,11 @@ from pathlib import Path
 import yaml
 from pydantic_settings import BaseSettings
 
-PKG_DIR = Path(__file__).parent.parent.resolve()
-transcript_dir = PKG_DIR / "files/transcripts"
-summaries_dir = PKG_DIR / "files/summaries"
-params_path = PKG_DIR / "src/params.yaml"
-video_urls_path = PKG_DIR / "video_urls.yaml"
+ROOT_DIR = Path(__file__).parent.parent.parent.resolve()
+
+transcript_dir = ROOT_DIR / "files/transcripts"
+summaries_dir = ROOT_DIR / "files/summaries"
+params_path = ROOT_DIR / f"video_summarizer/configs/params.yaml"
 
 
 class statuses(Enum):

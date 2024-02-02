@@ -1,10 +1,10 @@
 import yaml
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from main import main
 from pydantic import BaseModel
 
-from main import main
-from src.configs import params_path, statuses
+from video_summarizer.configs.configs import params_path, statuses
 
 
 class VideoUrls(BaseModel):
