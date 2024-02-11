@@ -1,14 +1,13 @@
-import os
-from urllib.parse import quote_plus
 
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from pymongo import MongoClient
 from tqdm import tqdm
 
 from video_summarizer.configs import configs
+from video_summarizer.src.extract_transcript import get_transcript_from_db
+from video_summarizer.src.utils import get_mongodb_client
 
 
 def init_model():
@@ -52,7 +51,7 @@ def chunk_a_list(data: list[str], chunk_size: int) -> list[list[str]]:
     return result
 
 
-def check_if_summarised(video_id: str):
+def check_if_summarised(video_id: str) -> tuple[bool, None | str]:
     """Checks if a video has already been summarised"""
 
     is_summarised = False
@@ -114,27 +113,7 @@ def summarize_list_of_summaries(summaries, chunk_size, bullets, model, limit):
     ]
 
     # repeat
-    return summarize_transcript(" ".join(combined_summaries), bullets, model, limit)
-
-def get_mongodb_client():
-    """Returns a mongodb client"""
-    
-    load_dotenv()
-    app_env = os.environ.get("APP_ENV")
-    env_file = f"{app_env}.env"
-
-    load_dotenv(find_dotenv(filename=env_file))
-    
-    _USER = os.environ.get("_MONGO_UNAME")
-    _PASSWORD = quote_plus(os.environ.get("_MONGO_PWD"))
-    _HOST = os.environ.get("_MONGO_HOST")
-    _DB = os.environ.get("_MONGO_DB")
-    _PORT = os.environ.get("_MONGO_PORT")
-
-    uri = f"mongodb://{_USER}:{_PASSWORD}@{_HOST}:{_PORT}/?authSource={_DB}"
-    
-    return MongoClient(uri), _DB
-    
+    return summarize_transcript(" ".join(combined_summaries), bullets, model, limit)    
     
 def save_results(data: dict | list[dict]):
     """Saves data to a MongoDB database"""
@@ -155,80 +134,71 @@ def save_results(data: dict | list[dict]):
         else:
             raise ValueError(f"Cannot save type: {type(data)}")
 
-def main(LIMIT_TRANSCRIPT: int | float | None):
+def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
     load_dotenv()
 
     model = init_model()
     msgs = []
 
-    paths = list(configs.transcript_dir.glob("*.txt"))
-    video_ids = [p.stem.split("vid:")[-1] for p in paths]
-    files = list(zip(video_ids, paths))
-    
     Params = configs.Params
 
-    for i, file in enumerate(files):
-        vid, path = file
+    is_summarised, msg = check_if_summarised(video_id)
 
-        is_summarised, msg = check_if_summarised(t_path=path, summary_dir=configs.summaries_dir)
+    if is_summarised:
+        print(f"{video_id=}' has already been summarised")
+        msgs.append(msg)
 
-        if is_summarised:
-            print(f"Video '{path.stem}' has already been summarised")
-            msgs.append(msg)
+    else:
+        print(f"Summarising {video_id=} ...")
+        transcript = get_transcript_from_db()
+
+        # Chunk the entire transcript into list of lines
+        transcripts = chunk_a_list(transcript, Params.load().CHUNK_SIZE)
+
+        if (LIMIT_TRANSCRIPT is not None) & (LIMIT_TRANSCRIPT > 1):
+            transcripts = transcripts[:LIMIT_TRANSCRIPT]
+
+        elif LIMIT_TRANSCRIPT <= 1:
+            length = len(transcripts) * LIMIT_TRANSCRIPT
+            transcripts = transcripts[: int(length)]
 
         else:
-            print(f"Summarising video '{path.stem}' ...")
+            raise ValueError("incorrect value for LIMIT_TRANSCRIPT")
 
-            with open(path, mode="r") as f:
-                transcript = [line.strip() for line in f.readlines()]
+        # Summary of summaries: recursively chunk the list & summarise until len(summaries) == 1
+        # Summarize each transcript
+        list_of_summaries = summarize_list_of_transcripts(
+            transcripts,
+            Params.load().BULLETS,
+            model,
+            Params.load().SUMMARY_LIMIT,
+        )
 
-            # Chunk the entire transcript into list of lines
-            transcripts = chunk_a_list(transcript, Params.load().CHUNK_SIZE)
+        # Combine summaries in chunks and summarize them iteratively until a single summary is obtained
+        while len(list_of_summaries) > 1:
+            list_of_summaries = [
+                summarize_list_of_summaries(
+                    list_of_summaries,
+                    Params.load().CHUNK_SIZE,
+                    Params.load().BULLETS,
+                    model,
+                    Params.load().SUMMARY_LIMIT,
+                )
+            ]
 
-            if (LIMIT_TRANSCRIPT is not None) & (LIMIT_TRANSCRIPT > 1):
-                transcripts = transcripts[:LIMIT_TRANSCRIPT]
+        # Output the final summary
+        assert len(list_of_summaries) == 1, "Not a summary of summaries"
+        msg = list_of_summaries[0]
 
-            elif LIMIT_TRANSCRIPT <= 1:
-                length = len(transcripts) * LIMIT_TRANSCRIPT
-                transcripts = transcripts[: int(length)]
+        video_summary = {
+            "video_id": video_id,
+            "summary": msg,
+            "params": dict(Params.load()),
+        }
+        
+        save_results(summary=video_summary)
 
-            else:
-                raise ValueError("incorrect value for LIMIT_TRANSCRIPT")
-
-            # Summary of summaries: recursively chunk the list & summarise until len(summaries) == 1
-            # Summarize each transcript
-            list_of_summaries = summarize_list_of_transcripts(
-                transcripts,
-                Params.load().BULLETS,
-                model,
-                Params.load().SUMMARY_LIMIT,
-            )
-
-            # Combine summaries in chunks and summarize them iteratively until a single summary is obtained
-            while len(list_of_summaries) > 1:
-                list_of_summaries = [
-                    summarize_list_of_summaries(
-                        list_of_summaries,
-                        Params.load().CHUNK_SIZE,
-                        Params.load().BULLETS,
-                        model,
-                        Params.load().SUMMARY_LIMIT,
-                    )
-                ]
-
-            # Output the final summary
-            assert len(list_of_summaries) == 1, "Not a summary of summaries"
-            msg = list_of_summaries[0]
-
-            video_summary = {
-                "video_id": vid,
-                "summary": msg,
-                "params": dict(Params.load()),
-            }
-            
-            save_results(summary=video_summary)
-
-            msgs.append(msg)
+        msgs.append(msg)
     return msgs
 
 if __name__ == "__main__":
