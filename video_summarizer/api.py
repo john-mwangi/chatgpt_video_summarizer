@@ -1,10 +1,12 @@
+import configparser
+
 import yaml
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import JSONResponse
 from main import main
 from pydantic import BaseModel
 
-from video_summarizer.configs.configs import params_path, statuses
+from video_summarizer.configs.configs import ROOT_DIR, params_path, statuses
 
 
 class VideoUrls(BaseModel):
@@ -15,7 +17,14 @@ class VideoUrls(BaseModel):
     sort_by: str = "newest"
 
 
-app = FastAPI()
+config = configparser.ConfigParser()
+config.read(ROOT_DIR / "pyproject.toml")
+version = config["tool.poetry"]["version"].replace('"', "")
+
+description = "Summarise videos using Gen AI"
+app = FastAPI(
+    title="ChatGPT Video Summarizer", description=description, version=version
+)
 router_v1 = APIRouter()
 
 
