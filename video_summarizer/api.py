@@ -20,6 +20,22 @@ app = FastAPI()
 
 @app.post(path="/summarize_video")
 def fetch_video_summary(video_urls: VideoUrls):
+    """Summarize a video using AI:
+    
+    Args:
+    ---
+    channels: a list of channels to retrive a video(s) to summarise from based on `sort_by` and `top_n` parameters\n
+    video: a list of video urls to summarise\n
+    limit_transcript: portion of the video transcript to summarise
+    (None=full, <1 = partial, >1 = number of chuncks)\n
+    top_n: retrieves this number of video from a channel to summarise\n
+    sort_by: sorts `top_n`
+    
+    Returns:
+    ---
+    A list of video summaries
+    """
+    
     with open(params_path, "r") as f:
         responses = yaml.safe_load(f).get("responses")
 
