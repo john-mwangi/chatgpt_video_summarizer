@@ -6,7 +6,8 @@ from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
 from video_summarizer.configs import configs
-from video_summarizer.src.extract_transcript import get_transcript_from_db
+from video_summarizer.src.extract_transcript import (get_transcript_from_db,
+                                                     get_video_title)
 from video_summarizer.src.utils import get_mongodb_client
 
 
@@ -55,7 +56,7 @@ def check_if_summarised(video_id: str) -> tuple[bool, None | str]:
     """Checks if a video has already been summarised"""
 
     is_summarised = False
-    summary = None
+    data = None
 
     client, db = get_mongodb_client()
     
@@ -66,9 +67,12 @@ def check_if_summarised(video_id: str) -> tuple[bool, None | str]:
 
     if result is not None:
         is_summarised = True
-        summary = result.get("summary")
         
-    return is_summarised, summary
+        data = {}
+        for k in configs.video_keys:
+            data[k] = result.get(k)
+    
+    return is_summarised, data
 
 
 def summarize_transcript(transcript, bullets, model, limit) -> str:
@@ -142,11 +146,11 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
 
     Params = configs.Params
 
-    is_summarised, msg = check_if_summarised(video_id)
+    is_summarised, data = check_if_summarised(video_id)
 
     if is_summarised:
         print(f"{video_id=}' has already been summarised")
-        msgs.append(msg)
+        msgs.append(data)
 
     else:
         print(f"Summarising {video_id=} ...")
@@ -190,13 +194,20 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
         assert len(list_of_summaries) == 1, "Not a summary of summaries"
         msg = list_of_summaries[0]
 
-        video_summary = {
+        video_url = f"https://www.youtube.com/watch?v={video_id}"
+        data = {
             "video_id": video_id,
+            "video_url": video_url,
+            "video_title": get_video_title(video_url),
             "summary": msg,
             "params": dict(Params.load()),
         }
         
-        save_results(summary=video_summary)
+        missing_keys = [k for k in data.keys() if k not in configs.video_keys]
+        if missing_keys:
+            raise ValueError(f"Some keys are not included: {missing_keys=}")
+        
+        save_results(summary=data)
 
         msgs.append(msg)
     return msgs
@@ -204,10 +215,13 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
 if __name__ == "__main__":
     
     check_if_summarised(video_id="TRjq7t2Ms5I")
+    check_if_summarised(video_id="JEBDfGqrAUA")
     exit()
     
     video_1 = {
         "video_id": "TRjq7t2Ms5I",
+        "video_url": "https://www.youtube.com/watch?v=TRjq7t2Ms5I",
+        "video_title": "Building Production-Ready RAG Applications: Jerry Liu",
         "summary": "Jerry's presentation addresses the challenges and advancements in implementing language model reasoning in real-world applications, focusing on enhancing data retrieval and integration for question answering and conversational agents.\n\n- Jerry introduces the topic and announces a raffle (0:00:14 - 0:00:26).\n- He discusses innovative uses of generative models (0:00:31 - 0:00:41).\n- The significance of retrieval augmentation and context integration is outlined (0:00:53 - 0:01:11).\n- Fine-tuning neural networks for knowledge embedding is introduced (0:01:13 - 0:01:22).\n- Challenges in productionizing applications are identified, especially regarding response quality and vector database retrieval (0:02:54 - 0:03:12).",
         "params": {
             "MODEL": "gpt-4-1106-preview",
@@ -218,7 +232,11 @@ if __name__ == "__main__":
         }
     }
     
-    video_2 = {"video_id": "JEBDfGqrAUA", "summary": "The video outlines a course on leveraging vector search and embeddings with large language models like GPT-4 for practical projects such as semantic search and question-answering applications.\n\n- Introduction to a course on vector search and embeddings with large language models like GPT-4. (0:00:00)\n- The first project focuses on creating a semantic search feature for movie queries. (0:00:14)\n- Discussion on building a question-answering app using Vector search and the RAG architecture. (0:00:25)\n- Usage of Python and JavaScript for semantic similarity searches in MongoDB's Atlas Vector search. (0:00:51)\n- Explanation of vector embeddings and their role in organizing digital data by similarity. (0:01:19)"}
+    video_2 = {
+        "video_id": "JEBDfGqrAUA", 
+        "video_url": "https://www.youtube.com/watch?v=JEBDfGqrAUA",
+        "video_title": "Vector Search RAG Tutorial – Combine Your Data with LLMs with Advanced Search",
+        "summary": "The video outlines a course on leveraging vector search and embeddings with large language models like GPT-4 for practical projects such as semantic search and question-answering applications.\n\n- Introduction to a course on vector search and embeddings with large language models like GPT-4. (0:00:00)\n- The first project focuses on creating a semantic search feature for movie queries. (0:00:14)\n- Discussion on building a question-answering app using Vector search and the RAG architecture. (0:00:25)\n- Usage of Python and JavaScript for semantic similarity searches in MongoDB's Atlas Vector search. (0:00:51)\n- Explanation of vector embeddings and their role in organizing digital data by similarity. (0:01:19)"}
     
     data = [video_1, video_2]
     save_results(data)

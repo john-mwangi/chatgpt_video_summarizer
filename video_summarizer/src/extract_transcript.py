@@ -52,7 +52,12 @@ def save_trancript(transcript: list[str], video_id: str) -> None:
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     video_title = get_video_title(video_url)
     
-    data = {"video_id": video_id, "video_title": video_title, "transcript": transcript}
+    data = {
+        "video_id": video_id, 
+        "video_url": video_url, 
+        "video_title": video_title, 
+        "transcript": transcript,
+        }
 
     client, db = get_mongodb_client()
     
@@ -62,8 +67,6 @@ def save_trancript(transcript: list[str], video_id: str) -> None:
         result = transcripts.insert_one(data)
         
     print(f"Successfully saved to the database: {result.inserted_id}")
-        
-
 
 def convert_video_ts(s: float) -> str:
     """Converts a video time stamp in secs to H:M:S"""
