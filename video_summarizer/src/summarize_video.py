@@ -1,4 +1,3 @@
-
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
@@ -6,8 +5,10 @@ from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
 from video_summarizer.configs import configs
-from video_summarizer.src.extract_transcript import (get_transcript_from_db,
-                                                     get_video_title)
+from video_summarizer.src.extract_transcript import (
+    get_transcript_from_db,
+    get_video_title,
+)
 from video_summarizer.src.utils import get_mongodb_client
 
 
@@ -59,7 +60,7 @@ def check_if_summarised(video_id: str) -> tuple[bool, None | str]:
     data = None
 
     client, db = get_mongodb_client()
-    
+
     with client:
         db = client[db]
         summaries = db.summaries
@@ -67,11 +68,11 @@ def check_if_summarised(video_id: str) -> tuple[bool, None | str]:
 
     if result is not None:
         is_summarised = True
-        
+
         data = {}
         for k in configs.video_keys:
             data[k] = result.get(k)
-    
+
     return is_summarised, data
 
 
@@ -107,7 +108,8 @@ def summarize_list_of_summaries(summaries, chunk_size, bullets, model, limit):
 
     # group list of summaries into chunks
     chunked_summaries = [
-        summaries[i : i + chunk_size] for i in range(0, len(summaries), chunk_size)
+        summaries[i : i + chunk_size]
+        for i in range(0, len(summaries), chunk_size)
     ]
 
     # join chunks into a single prompt/string and send to model
@@ -117,17 +119,20 @@ def summarize_list_of_summaries(summaries, chunk_size, bullets, model, limit):
     ]
 
     # repeat
-    return summarize_transcript(" ".join(combined_summaries), bullets, model, limit)    
-    
+    return summarize_transcript(
+        " ".join(combined_summaries), bullets, model, limit
+    )
+
+
 def save_results(data: dict | list[dict]):
     """Saves data to a MongoDB database"""
-    
+
     client, _DB = get_mongodb_client()
-    
+
     with client:
-        db = client[_DB]            # Establish db connection
-        summaries = db.summaries    # Create a collection
-        
+        db = client[_DB]  # Establish db connection
+        summaries = db.summaries  # Create a collection
+
         # Insert a record(s)
         if isinstance(data, dict):
             result = summaries.insert_one(data)
@@ -137,6 +142,7 @@ def save_results(data: dict | list[dict]):
             print(f"Successfully inserted the records: {result.inserted_ids}")
         else:
             raise ValueError(f"Cannot save type: {type(data)}")
+
 
 def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
     load_dotenv()
@@ -202,22 +208,23 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
             "summary": msg,
             "params": dict(Params.load()),
         }
-        
+
         missing_keys = [k for k in data.keys() if k not in configs.video_keys]
         if missing_keys:
             raise ValueError(f"Some keys are not included: {missing_keys=}")
-        
+
         save_results(summary=data)
 
         msgs.append(msg)
     return msgs
 
+
 if __name__ == "__main__":
-    
+
     check_if_summarised(video_id="TRjq7t2Ms5I")
     check_if_summarised(video_id="JEBDfGqrAUA")
     exit()
-    
+
     video_1 = {
         "video_id": "TRjq7t2Ms5I",
         "video_url": "https://www.youtube.com/watch?v=TRjq7t2Ms5I",
@@ -228,15 +235,16 @@ if __name__ == "__main__":
             "CHUNK_SIZE": 10,
             "SUMMARY_LIMIT": 150,
             "BULLETS": 5,
-            "BATCH_CHUNKS": 2
-        }
+            "BATCH_CHUNKS": 2,
+        },
     }
-    
+
     video_2 = {
-        "video_id": "JEBDfGqrAUA", 
+        "video_id": "JEBDfGqrAUA",
         "video_url": "https://www.youtube.com/watch?v=JEBDfGqrAUA",
         "video_title": "Vector Search RAG Tutorial – Combine Your Data with LLMs with Advanced Search",
-        "summary": "The video outlines a course on leveraging vector search and embeddings with large language models like GPT-4 for practical projects such as semantic search and question-answering applications.\n\n- Introduction to a course on vector search and embeddings with large language models like GPT-4. (0:00:00)\n- The first project focuses on creating a semantic search feature for movie queries. (0:00:14)\n- Discussion on building a question-answering app using Vector search and the RAG architecture. (0:00:25)\n- Usage of Python and JavaScript for semantic similarity searches in MongoDB's Atlas Vector search. (0:00:51)\n- Explanation of vector embeddings and their role in organizing digital data by similarity. (0:01:19)"}
-    
+        "summary": "The video outlines a course on leveraging vector search and embeddings with large language models like GPT-4 for practical projects such as semantic search and question-answering applications.\n\n- Introduction to a course on vector search and embeddings with large language models like GPT-4. (0:00:00)\n- The first project focuses on creating a semantic search feature for movie queries. (0:00:14)\n- Discussion on building a question-answering app using Vector search and the RAG architecture. (0:00:25)\n- Usage of Python and JavaScript for semantic similarity searches in MongoDB's Atlas Vector search. (0:00:51)\n- Explanation of vector embeddings and their role in organizing digital data by similarity. (0:01:19)",
+    }
+
     data = [video_1, video_2]
     save_results(data)

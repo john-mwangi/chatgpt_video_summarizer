@@ -51,22 +51,23 @@ def save_trancript(transcript: list[str], video_id: str) -> None:
 
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     video_title = get_video_title(video_url)
-    
+
     data = {
-        "video_id": video_id, 
-        "video_url": video_url, 
-        "video_title": video_title, 
+        "video_id": video_id,
+        "video_url": video_url,
+        "video_title": video_title,
         "transcript": transcript,
-        }
+    }
 
     client, db = get_mongodb_client()
-    
+
     with client:
         db = client[db]
         transcripts = db.transcripts
         result = transcripts.insert_one(data)
-        
+
     print(f"Successfully saved to the database: {result.inserted_id}")
+
 
 def convert_video_ts(s: float) -> str:
     """Converts a video time stamp in secs to H:M:S"""
@@ -81,19 +82,21 @@ def convert_video_ts(s: float) -> str:
     res = f"{hour}:{minutes}:{seconds}"
     return res
 
+
 def get_transcript_from_db(video_id: str):
     client, db = get_mongodb_client()
     with client:
         db = client[db]
         transcripts = db.transcripts
         result = transcripts.find_one({"video_id": video_id})
-        
+
     return result
 
+
 def main(url: str):
-    video_id = get_video_id(url)    
+    video_id = get_video_id(url)
     result = get_transcript_from_db(video_id)
-        
+
     if result is not None:
         print(f"{video_id=} transcript has already been downloaded")
     else:
@@ -101,6 +104,7 @@ def main(url: str):
         save_trancript(transcript, video_id)
 
     return video_id
+
 
 if __name__ == "__main__":
     URL = "https://www.youtube.com/watch?v=JEBDfGqrAUA"

@@ -8,6 +8,8 @@ ROOT_DIR = Path(__file__).parent.parent.parent.resolve()
 
 params_path = ROOT_DIR / f"video_summarizer/configs/params.yaml"
 video_keys = ["video_id", "video_url", "video_title", "summary"]
+
+
 class statuses(Enum):
     SUCCESS = 200
     ERROR = 400

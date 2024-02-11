@@ -6,7 +6,9 @@ from video_summarizer.src.extract_transcript import main as extract_main
 from video_summarizer.src.summarize_video import main as summarise_main
 
 
-def get_videos_from_channel(channel_url: str, sort_by: str, top_n: int) -> list[str]:
+def get_videos_from_channel(
+    channel_url: str, sort_by: str, top_n: int
+) -> list[str]:
     """Returns a list of video urls from a YouTube channel"""
 
     videos = get_channel(channel_url=channel_url, sort_by=sort_by)
@@ -91,7 +93,7 @@ def main(
     for video_id in video_ids:
         msg = summarise_main(LIMIT_TRANSCRIPT, video_id)
         msgs.append(msg)
-    
+
     return msgs
 
 
