@@ -3,11 +3,10 @@
 import json
 import urllib.parse
 import urllib.request
-from pathlib import Path
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from video_summarizer.configs.configs import transcript_dir
+from video_summarizer.src.utils import get_mongodb_client
 
 
 def get_video_id(url: str) -> str:
@@ -47,18 +46,23 @@ def get_video_title(video_url: str) -> str:
     return data.get("title", "Unknown Video Title")
 
 
-def save_trancript(transcript: list[str], video_id: str, file_dir: Path) -> None:
-    """Saves a transcript to a location"""
+def save_trancript(transcript: list[str], video_id: str) -> None:
+    """Saves a transcript to the database"""
 
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     video_title = get_video_title(video_url)
-    file_path = file_dir / video_title
+    
+    data = {"video_id": video_id, "video_title": video_title, "transcript": transcript}
 
-    if not file_dir.exists():
-        file_dir.mkdir()
-
-    with open(f"{file_path} - vid:{video_id}.txt", mode="w") as f:
-        f.writelines(transcript)
+    client, db = get_mongodb_client()
+    
+    with client:
+        db = client[db]
+        transcripts = db.transcripts
+        result = transcripts.insert_one(data)
+        
+    print(f"Successfully saved to the database: {result.inserted_id}")
+        
 
 
 def convert_video_ts(s: float) -> str:
@@ -74,19 +78,26 @@ def convert_video_ts(s: float) -> str:
     res = f"{hour}:{minutes}:{seconds}"
     return res
 
+def get_transcript_from_db(video_id: str):
+    client, db = get_mongodb_client()
+    with client:
+        db = client[db]
+        transcripts = db.transcripts
+        result = transcripts.find_one({"video_id": video_id})
+        
+    return result
 
-def main(url: str, dir: Path = transcript_dir):
-    video_id = get_video_id(url)
-
-    vids = list(dir.glob("*.txt"))
-    is_downloaded = any([True if v.stem.endswith(video_id) else False for v in vids])
-
-    if is_downloaded:
+def main(url: str):
+    video_id = get_video_id(url)    
+    result = get_transcript_from_db(video_id)
+        
+    if result is not None:
         print(f"{video_id=} transcript has already been downloaded")
     else:
         transcript = get_video_transcript(video_id)
-        save_trancript(transcript, video_id, dir)
+        save_trancript(transcript, video_id)
 
+    return video_id
 
 if __name__ == "__main__":
     URL = "https://www.youtube.com/watch?v=JEBDfGqrAUA"
