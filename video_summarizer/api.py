@@ -1,5 +1,5 @@
 import yaml
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.responses import JSONResponse
 from main import main
 from pydantic import BaseModel
@@ -16,9 +16,10 @@ class VideoUrls(BaseModel):
 
 
 app = FastAPI()
+router_v1 = APIRouter()
 
 
-@app.post(path="/summarize_video")
+@router_v1.post(path="/summarize_video")
 def fetch_video_summary(video_urls: VideoUrls):
     """Summarize a video using AI:
 
@@ -57,3 +58,7 @@ def fetch_video_summary(video_urls: VideoUrls):
         status_code = statuses.ERROR.value
 
     return JSONResponse(content={**data, **status}, status_code=status_code)
+
+
+# Mount the router on the app
+app.include_router(router_v1, prefix="/api/v1")
