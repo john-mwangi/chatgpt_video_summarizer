@@ -82,10 +82,16 @@ def main(
     print("Sorting YouTube videos by:", sort_by)
     print("Videos to summarise:", yt_urls)
 
+    video_ids = []
     for url in yt_urls:
-        extract_main(url=url)
+        vid = extract_main(url=url)
+        video_ids.append(vid)
 
-    msgs = summarise_main(LIMIT_TRANSCRIPT)
+    msgs = []
+    for video_id in video_ids:
+        msg = summarise_main(LIMIT_TRANSCRIPT, video_id)
+        msgs.append(msg)
+    
     return msgs
 
 

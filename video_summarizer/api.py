@@ -24,12 +24,12 @@ def fetch_video_summary(video_urls: VideoUrls):
     
     Args:
     ---
-    channels: a list of channels to retrive a video(s) to summarise from based on `sort_by` and `top_n` parameters\n
-    video: a list of video urls to summarise\n
-    limit_transcript: portion of the video transcript to summarise
-    (None=full, <1 = partial, >1 = number of chuncks)\n
-    top_n: retrieves this number of video from a channel to summarise\n
-    sort_by: sorts `top_n`
+    * channels: a list of channels to retrive a video(s) to summarise from based on `sort_by` and `top_n` parameters\n
+    * video: a list of video urls to summarise\n
+    * limit_transcript: portion of the video transcript to summarise
+    (None=full, <1 = partial, >=1 = number of chuncks)\n
+    * top_n: retrieves this number of video from a channel to summarise\n
+    * sort_by: sorts `top_n`
     
     Returns:
     ---
@@ -47,7 +47,7 @@ def fetch_video_summary(video_urls: VideoUrls):
             sort_by=video_urls.sort_by,
         )
 
-        data = {"summaries": summaries}
+        data = {"data": {"summaries": summaries}}
         status = responses.get("SUCCESS")
         status_code = statuses.SUCCESS.value
 
