@@ -10,8 +10,7 @@ from langchain.prompts import PromptTemplate
 from pymongo import MongoClient
 from tqdm import tqdm
 
-from video_summarizer.configs.configs import (Params, summaries_dir,
-                                              transcript_dir)
+from video_summarizer.configs import configs
 
 
 def init_model():
@@ -30,7 +29,7 @@ def init_model():
     )
 
     model = LLMChain(
-        llm=ChatOpenAI(model=Params.load().MODEL),
+        llm=ChatOpenAI(model=configs.Params.load().MODEL),
         prompt=prompt_template,
     )
 
@@ -157,14 +156,16 @@ def main(LIMIT_TRANSCRIPT: int | float | None):
     model = init_model()
     msgs = []
 
-    paths = list(transcript_dir.glob("*.txt"))
+    paths = list(configs.transcript_dir.glob("*.txt"))
     video_ids = [p.stem.split("vid:")[-1] for p in paths]
     files = list(zip(video_ids, paths))
+    
+    Params = configs.Params
 
     for i, file in enumerate(files):
         vid, path = file
 
-        is_summarised, msg = check_if_summarised(t_path=path, summary_dir=summaries_dir)
+        is_summarised, msg = check_if_summarised(t_path=path, summary_dir=configs.summaries_dir)
 
         if is_summarised:
             print(f"Video '{path.stem}' has already been summarised")
