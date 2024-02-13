@@ -9,7 +9,7 @@ from video_summarizer.src.extract_transcript import (
     get_transcript_from_db,
     get_video_title,
 )
-from video_summarizer.src.utils import get_mongodb_client
+from video_summarizer.src.utils import get_mongodb_client, logger
 
 
 def init_model():
@@ -136,10 +136,12 @@ def save_results(data: dict | list[dict]):
         # Insert a record(s)
         if isinstance(data, dict):
             result = summaries.insert_one(data)
-            print(f"Successfully added the record: {result.inserted_id}")
+            logger.info(f"Successfully added the record: {result.inserted_id}")
         elif isinstance(data, list):
             result = summaries.insert_many(data)
-            print(f"Successfully inserted the records: {result.inserted_ids}")
+            logger.info(
+                f"Successfully inserted the records: {result.inserted_ids}"
+            )
         else:
             raise ValueError(f"Cannot save type: {type(data)}")
 
@@ -155,11 +157,11 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
     is_summarised, data = check_if_summarised(video_id)
 
     if is_summarised:
-        print(f"{video_id=}' has already been summarised")
+        logger.info(f"{video_id=}' has already been summarised")
         msgs.append(data)
 
     else:
-        print(f"Summarising {video_id=} ...")
+        logger.info(f"Summarising {video_id=} ...")
         transcript = get_transcript_from_db()
 
         # Chunk the entire transcript into list of lines
