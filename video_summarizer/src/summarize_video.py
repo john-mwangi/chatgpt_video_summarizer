@@ -124,7 +124,7 @@ def summarize_list_of_summaries(summaries, chunk_size, bullets, model, limit):
     )
 
 
-def save_results(data: dict | list[dict]):
+def save_summary(data: dict | list[dict]):
     """Saves data to a MongoDB database"""
 
     client, _DB = get_mongodb_client()
@@ -215,7 +215,7 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
         if missing_keys:
             raise ValueError(f"Some keys are not included: {missing_keys=}")
 
-        save_results(summary=data)
+        save_summary(summary=data)
 
         msgs.append(msg)
     return msgs
@@ -249,4 +249,4 @@ if __name__ == "__main__":
     }
 
     data = [video_1, video_2]
-    save_results(data)
+    save_summary(data)
