@@ -6,7 +6,7 @@ import urllib.request
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from video_summarizer.src.utils import get_mongodb_client
+from video_summarizer.src.utils import get_mongodb_client, logger
 
 
 def get_video_id(url: str) -> str:
@@ -66,7 +66,7 @@ def save_trancript(transcript: list[str], video_id: str) -> None:
         transcripts = db.transcripts
         result = transcripts.insert_one(data)
 
-    print(f"Successfully saved to the database: {result.inserted_id}")
+    logger.info(f"Successfully saved to the database: {result.inserted_id}")
 
 
 def convert_video_ts(s: float) -> str:
@@ -98,7 +98,7 @@ def main(url: str):
     result = get_transcript_from_db(video_id)
 
     if result is not None:
-        print(f"{video_id=} transcript has already been downloaded")
+        logger.info(f"{video_id=} transcript has already been downloaded")
     else:
         transcript = get_video_transcript(video_id)
         save_trancript(transcript, video_id)

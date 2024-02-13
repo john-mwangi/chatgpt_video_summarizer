@@ -4,6 +4,7 @@ from scrapetube import get_channel
 
 from video_summarizer.src.extract_transcript import main as extract_main
 from video_summarizer.src.summarize_video import main as summarise_main
+from video_summarizer.src.utils import logger
 
 
 def get_videos_from_channel(
@@ -81,8 +82,8 @@ def main(
 
     yt_urls = load_urls(video_urls, sort_by=sort_by)
 
-    print("Sorting YouTube videos by:", sort_by)
-    print("Videos to summarise:", yt_urls)
+    logger.info("Sorting YouTube videos by:", sort_by)
+    logger.info("Videos to summarise:", yt_urls)
 
     video_ids = []
     for url in yt_urls:
