@@ -14,6 +14,20 @@ a portion of the video - the first 25% of the video being the default.
 - Set up Mongodb
 - Set up Python in a vitual environment and install the Poetry Python package
 - Install packages: `poetry install`
+## Creating a Mongodb user
+```
+use summaries
+db.createUser(
+  {
+    user: "admin",
+    pwd: passwordPrompt(),  // or cleartext password
+    roles: [
+       { role: "readWrite", db: "transcripts" },
+       { role: "readWrite", db: "summaries" }
+    ]
+  }
+)
+```
 ## Usage
 - Run the api: `uvicorn api:app --host 0.0.0.0 --port 12000`
 - Enter a channel url or video url to the api
