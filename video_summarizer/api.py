@@ -7,6 +7,7 @@ from main import main
 from pydantic import BaseModel
 
 from video_summarizer.configs.configs import ROOT_DIR, params_path, statuses
+from video_summarizer.src.utils import logger
 
 
 class VideoUrls(BaseModel):
@@ -62,6 +63,7 @@ def fetch_video_summary(video_urls: VideoUrls):
         status_code = statuses.SUCCESS.value
 
     except Exception as e:
+        logger.exception(e)
         data = {"summaries": None}
         status = responses.get("ERROR")
         status_code = statuses.ERROR.value
