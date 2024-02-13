@@ -11,12 +11,13 @@ a portion of the video - the first 25% of the video being the default.
 
 ## Installation
 - Clone this repo
-- Set up Python 3.10 in a vitual environment
-- Install packages: `pip install -r requirements.txt`
+- Set up Mongodb
+- Set up Python in a vitual environment and install the Poetry Python package
+- Install packages: `poetry install`
 ## Usage
-- Run the api
+- Run the api: `uvicorn api:app --host 0.0.0.0 --port 12000`
 - Enter a channel url or video url to the api
-- Video summaries will be saved under: `video-summarizer/files/summaries/`
+- Video summaries will be saved in the database
 
 ## Sample summary
 ![Sample video summary](./Screenshot.png)
