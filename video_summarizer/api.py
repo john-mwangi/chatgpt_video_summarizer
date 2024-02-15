@@ -21,8 +21,8 @@ class VideoUrls(BaseModel):
 config = configparser.ConfigParser()
 config.read(ROOT_DIR / "pyproject.toml")
 version = config["tool.poetry"]["version"].replace('"', "")
+description = config["tool.poetry"]["description"].replace('"', "")
 
-description = "Summarise videos using Gen AI"
 app = FastAPI(
     title="ChatGPT Video Summarizer", description=description, version=version
 )
