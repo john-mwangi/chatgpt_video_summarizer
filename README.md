@@ -11,7 +11,9 @@ a portion of the video - the first 25% of the video being the default.
 
 ## Installation
 - Clone this repo
-- Set up Mongodb
+- Set up Mongodb:
+  - Create `admin` user with `readWrite` access
+  - Create two databases
 - Set up Python in a vitual environment and install the Poetry Python package
 - Install packages: `poetry install`
 ## Creating a Mongodb user
