@@ -16,7 +16,7 @@ class statuses(Enum):
     NOT_FOUND = 404
 
 
-class Params(BaseSettings):
+class ModelParams(BaseSettings):
     MODEL: str
     CHUNK_SIZE: int
     SUMMARY_LIMIT: int
@@ -27,11 +27,11 @@ class Params(BaseSettings):
         with open(path, mode="r") as f:
             params = yaml.safe_load(f).get("model_params")
 
-        return Params(**params)
+        return ModelParams(**params)
 
 
 if __name__ == "__main__":
     print(ROOT_DIR)
-    print(Params.load().BATCH_CHUNKS)
-    print(Params.load())
-    print(dict(Params.load()))
+    print(ModelParams.load().BATCH_CHUNKS)
+    print(ModelParams.load())
+    print(dict(ModelParams.load()))
