@@ -5,8 +5,8 @@ from streamlit_tags import st_tags
 from video_summarizer.backend.configs.configs import params_path
 from video_summarizer.frontend.call_api import format_response, main
 
-videos = st_tags(label="YouTube Videos")
-channels = st_tags(label="YouTube Channels")
+st.sidebar.title("ChatGPT Video Summarizer")
+
 top_n = st.sidebar.number_input(
     label="Top N Videos", value=2, step=1, min_value=1, max_value=5
 )
@@ -18,6 +18,9 @@ sort_by = st.sidebar.selectbox(
 )
 submit = st.sidebar.button(label="Submit")
 
+videos = st_tags(label="YouTube Videos")
+channels = st_tags(label="YouTube Channels")
+
 with open(params_path, mode="r") as f:
     url = yaml.safe_load(f).get("endpoint")
 
@@ -28,7 +31,7 @@ if submit:
             "videos": videos,
             "limit_transcript": limit_transcript,
             "top_n": top_n,
-            "sort_by": sort_by,
+            "sort_by": sort_by.lower(),
         }
 
         response = main(url, data)
