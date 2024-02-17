@@ -4,9 +4,9 @@ from pathlib import Path
 import yaml
 from pydantic_settings import BaseSettings
 
-ROOT_DIR = Path(__file__).parent.parent.parent.resolve()
+ROOT_DIR = Path(__file__).parent.parent.parent.parent.resolve()
 
-params_path = ROOT_DIR / f"video_summarizer/configs/params.yaml"
+params_path = ROOT_DIR / f"video_summarizer/backend/configs/params.yaml"
 video_keys = ["video_id", "video_url", "video_title", "summary"]
 
 
@@ -31,6 +31,7 @@ class Params(BaseSettings):
 
 
 if __name__ == "__main__":
+    print(ROOT_DIR)
     print(Params.load().BATCH_CHUNKS)
     print(Params.load())
     print(dict(Params.load()))

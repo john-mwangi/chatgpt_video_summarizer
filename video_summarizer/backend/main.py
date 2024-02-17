@@ -2,9 +2,11 @@ from pprint import pprint
 
 from scrapetube import get_channel
 
-from video_summarizer.src.extract_transcript import main as extract_main
-from video_summarizer.src.summarize_video import main as summarise_main
-from video_summarizer.src.utils import logger
+from video_summarizer.backend.src.extract_transcript import (
+    main as extract_main,
+)
+from video_summarizer.backend.src.summarize_video import main as summarise_main
+from video_summarizer.backend.src.utils import logger
 
 
 def get_videos_from_channel(

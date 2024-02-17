@@ -4,12 +4,12 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
-from video_summarizer.configs import configs
-from video_summarizer.src.extract_transcript import (
+from video_summarizer.backend.configs import configs
+from video_summarizer.backend.src.extract_transcript import (
     get_transcript_from_db,
     get_video_title,
 )
-from video_summarizer.src.utils import get_mongodb_client, logger
+from video_summarizer.backend.src.utils import get_mongodb_client, logger
 
 
 def init_model():
