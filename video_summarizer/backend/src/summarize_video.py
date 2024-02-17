@@ -227,7 +227,9 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
 
         save_summary(data)
 
-        msgs.append(msg)
+        res = {k: v for k, v in data.items() if k in configs.video_keys}
+        msgs.append(res)
+
     return msgs
 
 
