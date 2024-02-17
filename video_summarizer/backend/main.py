@@ -45,10 +45,12 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str]:
     channels = video_urls.get("channels", [])
 
     if len(channels) > 0:
+        urls = []
         for channel in channels:
-            urls = get_videos_from_channel(
+            u = get_videos_from_channel(
                 channel_url=channel, top_n=top_n, sort_by=sort_by
             )
+            urls.extend(u)
 
     v_urls = video_urls.get("videos", [])
 
@@ -64,11 +66,11 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str]:
 
 
 def main(
-    channels: list = [],
-    videos: list = [],
-    LIMIT_TRANSCRIPT: int | float | None = 0.25,
-    top_n: int = 2,
-    sort_by: str = "newest",
+    channels: list,
+    videos: list,
+    LIMIT_TRANSCRIPT: int | float | None,
+    top_n: int,
+    sort_by: str,
 ):
     """
     Use one of the following values for `LIMIT_TRANSCRIPT_`
@@ -83,6 +85,8 @@ def main(
     video_urls["top_n"] = top_n
 
     yt_urls = load_urls(video_urls, sort_by=sort_by)
+
+    logger.info(f"Summarising {len(yt_urls)} videos")
 
     video_ids = []
     for url in yt_urls:
