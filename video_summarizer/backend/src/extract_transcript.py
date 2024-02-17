@@ -66,7 +66,9 @@ def save_trancript(transcript: list[str], video_id: str) -> None:
         transcripts = db.transcripts
         result = transcripts.insert_one(data)
 
-    logger.info(f"Successfully saved to the database: {result.inserted_id}")
+    logger.info(
+        f"Record {result.inserted_id} successfully saved to {transcripts.name} collection in {db.name} database"
+    )
 
 
 def convert_video_ts(s: float) -> str:
@@ -83,14 +85,14 @@ def convert_video_ts(s: float) -> str:
     return res
 
 
-def get_transcript_from_db(video_id: str) -> list[str]:
+def get_transcript_from_db(video_id: str) -> dict | None:
     client, db = get_mongodb_client()
     with client:
         db = client[db]
         transcripts = db.transcripts
         result = transcripts.find_one({"video_id": video_id})
 
-    return result.get("transcript")
+    return result
 
 
 def main(url: str):
