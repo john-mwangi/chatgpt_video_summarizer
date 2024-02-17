@@ -56,6 +56,7 @@ def fetch_video_summary(video_urls: VideoUrls):
             videos=video_urls.videos,
             LIMIT_TRANSCRIPT=video_urls.limit_transcript,
             sort_by=video_urls.sort_by,
+            top_n=video_urls.top_n,
         )
 
         data = {"data": {"summaries": summaries}}

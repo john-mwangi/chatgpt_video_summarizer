@@ -63,11 +63,11 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str]:
 
 
 def main(
-    channels: list = [],
-    videos: list = [],
-    LIMIT_TRANSCRIPT: int | float | None = 0.25,
-    top_n: int = 2,
-    sort_by: str = "newest",
+    channels: list,
+    videos: list,
+    LIMIT_TRANSCRIPT: int | float | None,
+    top_n: int,
+    sort_by: str,
 ):
     """
     Use one of the following values for `LIMIT_TRANSCRIPT_`
