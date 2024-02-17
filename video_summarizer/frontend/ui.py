@@ -1,6 +1,8 @@
 import streamlit as st
+import yaml
 from streamlit_tags import st_tags
 
+from video_summarizer.backend.configs.configs import params_path
 from video_summarizer.frontend.call_api import format_response, main
 
 videos = st_tags(label="YouTube Videos")
@@ -16,9 +18,10 @@ sort_by = st.sidebar.selectbox(
 )
 submit = st.sidebar.button(label="Submit")
 
-if submit:
-    url = "http://0.0.0.0:12000/api/v1/summarize_video"
+with open(params_path, mode="r") as f:
+    url = yaml.safe_load(f).get("endpoint")
 
+if submit:
     if videos or channels:
         data = {
             "channels": channels,
