@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 from main import main
 from pydantic import BaseModel
 
-from video_summarizer.configs.configs import ROOT_DIR, params_path, statuses
-from video_summarizer.src.utils import logger
+from video_summarizer.backend.configs import configs
+from video_summarizer.backend.src.utils import logger
 
 
 class VideoUrls(BaseModel):
@@ -19,7 +19,7 @@ class VideoUrls(BaseModel):
 
 
 config = configparser.ConfigParser()
-config.read(ROOT_DIR / "pyproject.toml")
+config.read(configs.ROOT_DIR / "pyproject.toml")
 version = config["tool.poetry"]["version"].replace('"', "")
 description = config["tool.poetry"]["description"].replace('"', "")
 
@@ -47,7 +47,7 @@ def fetch_video_summary(video_urls: VideoUrls):
     A list of video summaries
     """
 
-    with open(params_path, "r") as f:
+    with open(configs.params_path, "r") as f:
         responses = yaml.safe_load(f).get("responses")
 
     try:
@@ -60,13 +60,13 @@ def fetch_video_summary(video_urls: VideoUrls):
 
         data = {"data": {"summaries": summaries}}
         status = responses.get("SUCCESS")
-        status_code = statuses.SUCCESS.value
+        status_code = configs.statuses.SUCCESS.value
 
     except Exception as e:
         logger.exception(e)
         data = {"summaries": None}
         status = responses.get("ERROR")
-        status_code = statuses.ERROR.value
+        status_code = configs.statuses.ERROR.value
 
     return JSONResponse(content={**data, **status}, status_code=status_code)
 
