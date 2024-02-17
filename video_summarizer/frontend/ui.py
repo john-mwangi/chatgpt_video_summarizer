@@ -8,14 +8,27 @@ from video_summarizer.frontend.call_api import format_response, main
 st.sidebar.title("ChatGPT Video Summarizer")
 
 top_n = st.sidebar.number_input(
-    label="Top N Videos", value=2, step=1, min_value=1, max_value=5
+    label="Top N Videos",
+    value=2,
+    step=1,
+    min_value=1,
+    max_value=5,
+    help="Retrieves this number of video from a channel to summarise",
 )
+
 limit_transcript = st.sidebar.number_input(
-    label="Limit Transcript", value=0.25, step=0.1
+    label="Limit Transcript",
+    value=0.25,
+    step=0.1,
+    help="Portion of the video transcript to summarise",
 )
+
 sort_by = st.sidebar.selectbox(
-    label="Sort By", options=["Newest", "Popular", "Oldest"]
+    label="Sort By",
+    options=["Newest", "Popular", "Oldest"],
+    help="Criteria to sort channel videos",
 )
+
 submit = st.sidebar.button(label="Submit")
 
 videos = st_tags(label="YouTube Videos")
@@ -37,5 +50,6 @@ if submit:
         response = main(url, data)
         result = format_response(response)
         st.markdown("".join(result))
+
     else:
         st.markdown("Please include at least one video or channel url.")
