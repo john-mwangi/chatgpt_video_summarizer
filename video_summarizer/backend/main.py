@@ -6,6 +6,7 @@ from video_summarizer.backend.src.extract_transcript import (
     main as extract_main,
 )
 from video_summarizer.backend.src.summarize_video import main as summarise_main
+from video_summarizer.backend.src.utils import logger
 
 
 def get_videos_from_channel(
@@ -44,10 +45,12 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str]:
     channels = video_urls.get("channels", [])
 
     if len(channels) > 0:
+        urls = []
         for channel in channels:
-            urls = get_videos_from_channel(
+            u = get_videos_from_channel(
                 channel_url=channel, top_n=top_n, sort_by=sort_by
             )
+            urls.extend(u)
 
     v_urls = video_urls.get("videos", [])
 
@@ -82,6 +85,8 @@ def main(
     video_urls["top_n"] = top_n
 
     yt_urls = load_urls(video_urls, sort_by=sort_by)
+
+    logger.info(f"Summarising {len(yt_urls)} videos")
 
     video_ids = []
     for url in yt_urls:
