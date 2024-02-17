@@ -4609,6 +4609,20 @@ watchdog = {version = ">=2.1.5", markers = "platform_system != \"Darwin\""}
 snowflake = ["snowflake-connector-python (>=2.8.0)", "snowflake-snowpark-python (>=0.9.0)"]
 
 [[package]]
+name = "streamlit-tags"
+version = "1.2.8"
+description = "Tags custom component for Streamlit"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "streamlit_tags-1.2.8-py3-none-any.whl", hash = "sha256:c71b10666f3fce67d8e0b3c089aa50dc48830d310223fb88005b08f157586f95"},
+    {file = "streamlit_tags-1.2.8.tar.gz", hash = "sha256:9ea46b21f206dc73164e59e3c800a96c863c90af57afde20115f001a6d986583"},
+]
+
+[package.dependencies]
+streamlit = ">=0.63"
+
+[[package]]
 name = "tenacity"
 version = "8.2.3"
 description = "Retry code until it succeeds"
@@ -5341,4 +5355,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "c7500d58c3c286513352becce6316f4338928e414fb75c39ce29ae7c7cb0d954"
+content-hash = "6d83f479fe46e71533662ba46adb47c243dbb5ab24d3accc2e651f7ad2d37266"

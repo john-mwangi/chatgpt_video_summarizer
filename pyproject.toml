@@ -193,6 +193,7 @@ virtualenv = "20.25.0"
 xattr = "0.10.1"
 pymongo = "^4.6.1"
 black = "^24.1.1"
+streamlit-tags = "^1.2.8"
 
 
 [build-system]
