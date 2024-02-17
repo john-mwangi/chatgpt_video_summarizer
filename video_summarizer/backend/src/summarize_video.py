@@ -162,7 +162,7 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
 
     else:
         logger.info(f"Summarising {video_id=} ...")
-        transcript = get_transcript_from_db()
+        transcript = get_transcript_from_db(video_id=video_id)
 
         # Chunk the entire transcript into list of lines
         transcripts = chunk_a_list(transcript, ModelParams.load().CHUNK_SIZE)
@@ -211,11 +211,11 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
             "params": dict(ModelParams.load()),
         }
 
-        missing_keys = [k for k in data.keys() if k not in configs.video_keys]
-        if missing_keys:
-            raise ValueError(f"Some keys are not included: {missing_keys=}")
+        # missing_keys = [k for k in data.keys() if k not in configs.video_keys]
+        # if missing_keys:
+        #     raise ValueError(f"Some keys are not included: {missing_keys=}")
 
-        save_summary(summary=data)
+        save_summary(data)
 
         msgs.append(msg)
     return msgs

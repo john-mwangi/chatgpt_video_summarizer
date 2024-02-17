@@ -83,14 +83,14 @@ def convert_video_ts(s: float) -> str:
     return res
 
 
-def get_transcript_from_db(video_id: str):
+def get_transcript_from_db(video_id: str) -> list[str]:
     client, db = get_mongodb_client()
     with client:
         db = client[db]
         transcripts = db.transcripts
         result = transcripts.find_one({"video_id": video_id})
 
-    return result
+    return result.get("transcript")
 
 
 def main(url: str):
