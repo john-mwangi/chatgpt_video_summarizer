@@ -173,7 +173,12 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
             "params": dict(ModelParams.load()),
         }
 
-        missing_keys = [k for k in configs.video_keys if k not in data.keys()]
+        missing_keys = [
+            k
+            for k in configs.video_keys.remove("summary")
+            if k not in data.keys()
+        ]
+
         if missing_keys:
             raise ValueError(f"Some keys are not included: {missing_keys=}")
 
