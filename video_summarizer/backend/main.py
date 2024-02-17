@@ -84,9 +84,6 @@ def main(
 
     yt_urls = load_urls(video_urls, sort_by=sort_by)
 
-    logger.info("Sorting YouTube videos by:", sort_by)
-    logger.info("Videos to summarise:", yt_urls)
-
     video_ids = []
     for url in yt_urls:
         vid = extract_main(url=url)
