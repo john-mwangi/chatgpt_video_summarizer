@@ -2,9 +2,11 @@ from pprint import pprint
 
 from scrapetube import get_channel
 
-from video_summarizer.src.extract_transcript import main as extract_main
-from video_summarizer.src.summarize_video import main as summarise_main
-from video_summarizer.src.utils import logger
+from video_summarizer.backend.src.extract_transcript import (
+    main as extract_main,
+)
+from video_summarizer.backend.src.summarize_video import main as summarise_main
+from video_summarizer.backend.src.utils import logger
 
 
 def get_videos_from_channel(
@@ -81,9 +83,6 @@ def main(
     video_urls["top_n"] = top_n
 
     yt_urls = load_urls(video_urls, sort_by=sort_by)
-
-    logger.info("Sorting YouTube videos by:", sort_by)
-    logger.info("Videos to summarise:", yt_urls)
 
     video_ids = []
     for url in yt_urls:

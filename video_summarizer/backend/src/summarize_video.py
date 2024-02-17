@@ -4,12 +4,12 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
-from video_summarizer.configs import configs
-from video_summarizer.src.extract_transcript import (
+from video_summarizer.backend.configs import configs
+from video_summarizer.backend.src.extract_transcript import (
     get_transcript_from_db,
     get_video_title,
 )
-from video_summarizer.src.utils import get_mongodb_client, logger
+from video_summarizer.backend.src.utils import get_mongodb_client, logger
 
 
 def init_model():
@@ -28,7 +28,7 @@ def init_model():
     )
 
     model = LLMChain(
-        llm=ChatOpenAI(model=configs.Params.load().MODEL),
+        llm=ChatOpenAI(model=configs.ModelParams.load().MODEL),
         prompt=prompt_template,
     )
 
@@ -152,7 +152,7 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
     model = init_model()
     msgs = []
 
-    Params = configs.Params
+    ModelParams = configs.ModelParams
 
     is_summarised, data = check_if_summarised(video_id)
 
@@ -165,7 +165,7 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
         transcript = get_transcript_from_db()
 
         # Chunk the entire transcript into list of lines
-        transcripts = chunk_a_list(transcript, Params.load().CHUNK_SIZE)
+        transcripts = chunk_a_list(transcript, ModelParams.load().CHUNK_SIZE)
 
         if (LIMIT_TRANSCRIPT is not None) & (LIMIT_TRANSCRIPT > 1):
             transcripts = transcripts[:LIMIT_TRANSCRIPT]
@@ -181,9 +181,9 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
         # Summarize each transcript
         list_of_summaries = summarize_list_of_transcripts(
             transcripts,
-            Params.load().BULLETS,
+            ModelParams.load().BULLETS,
             model,
-            Params.load().SUMMARY_LIMIT,
+            ModelParams.load().SUMMARY_LIMIT,
         )
 
         # Combine summaries in chunks and summarize them iteratively until a single summary is obtained
@@ -191,10 +191,10 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
             list_of_summaries = [
                 summarize_list_of_summaries(
                     list_of_summaries,
-                    Params.load().CHUNK_SIZE,
-                    Params.load().BULLETS,
+                    ModelParams.load().CHUNK_SIZE,
+                    ModelParams.load().BULLETS,
                     model,
-                    Params.load().SUMMARY_LIMIT,
+                    ModelParams.load().SUMMARY_LIMIT,
                 )
             ]
 
@@ -208,7 +208,7 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
             "video_url": video_url,
             "video_title": get_video_title(video_url),
             "summary": msg,
-            "params": dict(Params.load()),
+            "params": dict(ModelParams.load()),
         }
 
         missing_keys = [k for k in data.keys() if k not in configs.video_keys]
