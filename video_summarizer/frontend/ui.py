@@ -7,6 +7,9 @@ from video_summarizer.frontend.call_api import format_response, main
 
 st.sidebar.title("ChatGPT Video Summarizer")
 
+st.sidebar.image("./www/Gemini_Generated_Image.jpeg", width=None)
+st.sidebar.divider()
+
 top_n = st.sidebar.number_input(
     label="Top N Videos",
     value=2,
@@ -31,8 +34,8 @@ sort_by = st.sidebar.selectbox(
 
 submit = st.sidebar.button(label="Submit")
 
-videos = st_tags(label="YouTube Videos")
-channels = st_tags(label="YouTube Channels")
+videos = st_tags(label="YOUTUBE VIDEOS")
+channels = st_tags(label="YOUTUBE CHANNELS")
 
 with open(params_path, mode="r") as f:
     url = yaml.safe_load(f).get("endpoint")
