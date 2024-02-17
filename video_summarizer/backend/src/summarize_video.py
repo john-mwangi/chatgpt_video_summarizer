@@ -136,11 +136,13 @@ def save_summary(data: dict | list[dict]):
         # Insert a record(s)
         if isinstance(data, dict):
             result = summaries.insert_one(data)
-            logger.info(f"Successfully added the record: {result.inserted_id}")
+            logger.info(
+                f"Record {result.inserted_id} successfully added to {summaries.name} collection in {db.name} db"
+            )
         elif isinstance(data, list):
             result = summaries.insert_many(data)
             logger.info(
-                f"Successfully inserted the records: {result.inserted_ids}"
+                f"Record {result.inserted_ids} successfully added to {summaries.name} collection in {db.name} db"
             )
         else:
             raise ValueError(f"Cannot save type: {type(data)}")
@@ -161,8 +163,23 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
         msgs.append(data)
 
     else:
+
+        video_url = f"https://www.youtube.com/watch?v={video_id}"
+
+        data = {
+            "video_id": video_id,
+            "video_url": video_url,
+            "video_title": get_video_title(video_url),
+            "params": dict(ModelParams.load()),
+        }
+
+        missing_keys = [k for k in configs.video_keys if k not in data.keys()]
+        if missing_keys:
+            raise ValueError(f"Some keys are not included: {missing_keys=}")
+
         logger.info(f"Summarising {video_id=} ...")
-        transcript = get_transcript_from_db(video_id=video_id)
+        result = get_transcript_from_db(video_id=video_id)
+        transcript = result.get("transcript")
 
         # Chunk the entire transcript into list of lines
         transcripts = chunk_a_list(transcript, ModelParams.load().CHUNK_SIZE)
@@ -202,18 +219,7 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
         assert len(list_of_summaries) == 1, "Not a summary of summaries"
         msg = list_of_summaries[0]
 
-        video_url = f"https://www.youtube.com/watch?v={video_id}"
-        data = {
-            "video_id": video_id,
-            "video_url": video_url,
-            "video_title": get_video_title(video_url),
-            "summary": msg,
-            "params": dict(ModelParams.load()),
-        }
-
-        # missing_keys = [k for k in data.keys() if k not in configs.video_keys]
-        # if missing_keys:
-        #     raise ValueError(f"Some keys are not included: {missing_keys=}")
+        data.update({"summary": msg})
 
         save_summary(data)
 
