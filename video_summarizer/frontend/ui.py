@@ -19,14 +19,17 @@ submit = st.sidebar.button(label="Submit")
 if submit:
     url = "http://0.0.0.0:12000/api/v1/summarize_video"
 
-    data = {
-        "channels": channels,
-        "videos": videos,
-        "limit_transcript": limit_transcript,
-        "top_n": top_n,
-        "sort_by": sort_by,
-    }
+    if videos or channels:
+        data = {
+            "channels": channels,
+            "videos": videos,
+            "limit_transcript": limit_transcript,
+            "top_n": top_n,
+            "sort_by": sort_by,
+        }
 
-    response = main(url, data)
-    result = format_response(response)
-    st.markdown("".join(result))
+        response = main(url, data)
+        result = format_response(response)
+        st.markdown("".join(result))
+    else:
+        st.markdown("Please include at least one video or channel url.")
