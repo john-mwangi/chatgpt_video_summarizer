@@ -32,6 +32,8 @@ def get_mongodb_client():
 
 def get_logging_level():
     level = os.environ.get("LOGGING_LEVEL", "WARNING")
+    level = level.upper().strip()
+
     levels = {
         "DEBUG": logging.DEBUG,
         "INFO": logging.INFO,
