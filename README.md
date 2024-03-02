@@ -6,7 +6,7 @@ It will provide a brief 150 word summary of the video as well as the top 5 main 
 The main points are timestamped so that it's easy to navigate the video where
 the conversation is taking place. 
 
-This tool as allows one to determine whether to summarise the entire video or
+This tool allows one to determine whether to summarise the entire video or
 a portion of the video - the first 25% of the video being the default.
 
 ## Installation
@@ -32,6 +32,7 @@ db.createUser(
 ```
 ## Usage
 - Run the api: `uvicorn api:app --host 0.0.0.0 --port 12000`
+- Run the webapp: `streamlit run ui.py`
 - Enter a channel url or video url to the api
 - Video summaries will be saved in the database
 
