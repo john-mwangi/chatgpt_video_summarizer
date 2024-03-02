@@ -3,7 +3,7 @@ import yaml
 from streamlit_tags import st_tags
 
 from video_summarizer.backend.configs.configs import params_path
-from video_summarizer.frontend.call_api import format_response, main
+from video_summarizer.frontend.server import format_response, main
 
 st.sidebar.title("ChatGPT Video Summarizer")
 
@@ -34,8 +34,18 @@ sort_by = st.sidebar.selectbox(
 
 submit = st.sidebar.button(label="Submit")
 
-videos = st_tags(label="YOUTUBE VIDEOS")
-channels = st_tags(label="YOUTUBE CHANNELS")
+urls = st_tags(label="YOUTUBE VIDEOS")
+st.write("Enter a list of YouTube channels or videos.")
+
+channels = [
+    url for url in urls if url.strip().startswith("https://www.youtube.com/@")
+]
+
+videos = [
+    url
+    for url in urls
+    if url.strip().startswith("https://www.youtube.com/watch?v=")
+]
 
 with open(params_path, mode="r") as f:
     url = yaml.safe_load(f).get("endpoint")
