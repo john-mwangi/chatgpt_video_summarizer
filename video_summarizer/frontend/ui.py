@@ -36,6 +36,7 @@ submit = st.sidebar.button(label="Submit")
 
 urls = st_tags(label="YOUTUBE VIDEOS")
 st.write("Enter a list of YouTube channels or videos.")
+st.divider()
 
 channels = [
     url for url in urls if url.strip().startswith("https://www.youtube.com/@")

@@ -34,7 +34,7 @@ db.createUser(
 - Run the api: `uvicorn api:app --host 0.0.0.0 --port 12000`
 - Run the webapp: `streamlit run ui.py`
 - Enter a channel url or video url to the api
-- Video summaries will be saved in the database
+- Video summaries will be saved in the database and display on the app
 
-## Sample summary
-![Sample video summary](./Screenshot.png)
+## Web App
+![Sample video summary](./webapp_ss.png)
