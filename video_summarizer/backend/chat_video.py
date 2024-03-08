@@ -58,21 +58,21 @@ if __name__ == "__main__":
     PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
     PINECONE_ENVIRONMENT = os.environ.get("PINECONE_ENVIRONMENT")
 
-    vid = "JEBDfGqrAUA"
-    video_id = vid.lower()
+    video_id = "JEBDfGqrAUA"
+    vid = video_id.lower()
 
     # create an index
-    index = get_create_pinecone_index(index_name=video_id)
+    index = get_create_pinecone_index(index_name=vid)
 
     # get embeddings
     embeddings = OpenAIEmbeddings()
 
     # insert docs to pinecone index
-    res = get_document(video_id=vid)
+    res = get_document(video_id=video_id)
     docs = split_docs(res)
 
     vector_store = PineconeLang.from_documents(
-        documents=docs, embedding=embeddings, index_name=video_id
+        documents=docs, embedding=embeddings, index_name=vid
     )
 
     logger.info(vector_store)
