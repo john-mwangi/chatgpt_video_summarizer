@@ -43,7 +43,12 @@ def get_document(video_id: str):
 
 def split_docs(res: dict):
     transcript = res.get("transcript")
-    splitter = TextSplitter(chunk_size=1000, chunk_overlap=0)
+
+    class CustomTextSplitter(TextSplitter):
+        def split_text(self, text: str):
+            pass
+
+    splitter = CustomTextSplitter(chunk_size=1000, chunk_overlap=0)
     docs = splitter.split_documents(transcript)
     return docs
 
