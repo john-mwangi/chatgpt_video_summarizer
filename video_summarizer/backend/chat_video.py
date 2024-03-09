@@ -5,6 +5,8 @@ import time
 
 import pandas as pd
 from dotenv import load_dotenv
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores.pinecone import Pinecone as PineconeLang
 from pinecone import Pinecone, PodSpec
 from pinecone.data.index import Index
 from tqdm.auto import tqdm
@@ -53,16 +55,9 @@ def get_document(video_id: str):
 
 
 def upsert_documents_to_pinecone(
-    idx: Index, video_id: str, index_name: str, delete=False
+    idx: Index, video_id: str, index_name: str, embeddings
 ):
     """Inserts document to an index associated with a video id"""
-
-    # delete the index
-    if delete:
-        pc.delete_index(index_name)
-        vector_count = index.describe_index_stats().get("total_vector_count")
-        assert vector_count == 0
-        logger.info(f"Successfully deleted {index_name=}")
 
     # check that the index for this video is not empty
     stats = idx.describe_index_stats()
@@ -70,13 +65,17 @@ def upsert_documents_to_pinecone(
 
     if total_vector_count > 0:
         logger.info(f"{index_name=} for is already populated")
-        return None
+        return
 
     # convert transcript to dataframe
     res = get_document(video_id)
     transcript = res.get("transcript")
 
     df = pd.DataFrame(transcript)
+    if df.isnull().values.any():
+        logger.error("df contains null values")
+        return
+
     data = df[0].str.extract(r"\n(\d+:\d{2}:\d{2})\s-\s(.*)")
     data.columns = ["timestamp", "text"]
 
@@ -86,29 +85,51 @@ def upsert_documents_to_pinecone(
         i_end = min(len(data), i + batch_size)
         batch = data.iloc[i:i_end]
         ids = [f"{video_id}-{i}" for i, x in batch.iterrows()]
-        texts = [x["text"] for _, x in batch.iterrows()]
+        texts = [str(x["text"]) for _, x in batch.iterrows()]
+
         embeds = embeddings.embed_documents(texts)
+
         metadata = [
-            {"text": x["text"], "timestamp": x["timestamp"]}
+            {"text": str(x["text"]), "timestamp": str(x["timestamp"])}
             for _, x in batch.iterrows()
         ]
-        index.upsert(vectors=zip(ids, embeds, metadata))
+        idx.upsert(vectors=zip(ids, embeds, metadata))
         logger.info(f"Successfully added content to {index_name=}")
 
 
-if __name__ == "__main__":
-    from langchain.embeddings.openai import OpenAIEmbeddings
+def main(video_id: str, delete_index=False, embeddings=OpenAIEmbeddings()):
 
-    video_id = "JEBDfGqrAUA"
     index_name = video_id.lower()
+
+    # delete the index
+    if delete_index:
+        try:
+            pc.delete_index(index_name)
+            logger.info(f"Successfully deleted {index_name=}")
+        except:
+            logger.info(f"{index_name=} already deleted")
 
     # create an index
     index = get_create_pinecone_index(index_name=index_name)
 
-    # get embeddings
-    embeddings = OpenAIEmbeddings()
-
     # insert content to vectorstore
     upsert_documents_to_pinecone(
-        idx=index, video_id=video_id, delete=True, index_name=index_name
+        idx=index,
+        video_id=video_id,
+        index_name=index_name,
+        embeddings=embeddings,
     )
+
+    # use RAG ("text" is from the metadata)
+    vectorstore = PineconeLang(
+        index=index, embedding=embeddings, text_key="text"
+    )
+
+    query = "What is vector search?"
+    query_res = vectorstore.similarity_search({"query": query, "k": 3})
+    # query_res = vectorstore.similarity_search(query=query)
+    print(query_res)
+
+
+if __name__ == "__main__":
+    main(video_id="JEBDfGqrAUA")
