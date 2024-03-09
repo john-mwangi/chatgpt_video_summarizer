@@ -20,6 +20,7 @@ pc = Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
 
 
 def get_create_pinecone_index(index_name: str):
+    """Retrieve an index from Pinecode vectorstore"""
 
     available_idx = [i.get("name") for i in pc.list_indexes().get("indexes")]
 
@@ -42,6 +43,8 @@ def get_create_pinecone_index(index_name: str):
 
 
 def get_document(video_id: str):
+    """Get a document related to a video from Mongodb"""
+
     client, db = get_mongodb_client()
     db = client[db]
     transcripts = db.transcripts
@@ -59,14 +62,14 @@ def upsert_documents_to_pinecone(
         pc.delete_index(index_name)
         vector_count = index.describe_index_stats().get("total_vector_count")
         assert vector_count == 0
-        logger.info("Index successfully deleted")
+        logger.info(f"Successfully deleted {index_name=}")
 
     # check that the index for this video is not empty
     stats = idx.describe_index_stats()
     total_vector_count = stats.get("total_vector_count")
 
     if total_vector_count > 0:
-        logger.info(f"Index for is already populated")
+        logger.info(f"{index_name=} for is already populated")
         return None
 
     # convert transcript to dataframe
@@ -90,6 +93,7 @@ def upsert_documents_to_pinecone(
             for _, x in batch.iterrows()
         ]
         index.upsert(vectors=zip(ids, embeds, metadata))
+        logger.info(f"Successfully added content to {index_name=}")
 
 
 if __name__ == "__main__":
@@ -103,6 +107,8 @@ if __name__ == "__main__":
 
     # get embeddings
     embeddings = OpenAIEmbeddings()
+
+    # insert content to vectorstore
     upsert_documents_to_pinecone(
         idx=index, video_id=video_id, delete=True, index_name=index_name
     )
