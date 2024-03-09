@@ -3,8 +3,10 @@
 import os
 import time
 
-from langchain.text_splitter import TextSplitter
+import pandas as pd
 from pinecone import Pinecone, PodSpec
+from pinecone.data.index import Index
+from tqdm.auto import tqdm
 
 from video_summarizer.backend.src.utils import get_mongodb_client, logger
 
@@ -28,7 +30,7 @@ def get_create_pinecone_index(index_name: str):
 
     # get the created index
     index = pc.Index(index_name)
-    logger.info(index.describe_index_stats())
+    logger.info(f"Pinecone index stats:\n {index.describe_index_stats()}")
 
     return index
 
@@ -41,16 +43,38 @@ def get_document(video_id: str):
     return result
 
 
-def split_docs(res: dict):
+def upsert_documents_to_pinecone(idx: Index, video_id: str):
+    """Inserts document to an index associated with a video id"""
+
+    # check that the index for this video is not empty
+    stats = idx.describe_index_stats()
+    total_vector_count = stats.get("total_vector_count")
+
+    if total_vector_count > 0:
+        logger.info(f"Index for is already populated")
+        return None
+
+    # convert transcript to dataframe
+    res = get_document(video_id)
     transcript = res.get("transcript")
 
-    class CustomTextSplitter(TextSplitter):
-        def split_text(self, text: str):
-            pass
+    df = pd.DataFrame(transcript)
+    data = df[0].str.extract(r"\n(\d+:\d{2}:\d{2})\s-\s(.*)")
+    data.columns = ["timestamp", "text"]
 
-    splitter = CustomTextSplitter(chunk_size=1000, chunk_overlap=0)
-    docs = splitter.split_documents(transcript)
-    return docs
+    # upload transcript to pinecone index
+    batch_size = 100
+    for i in tqdm(range(0, len(data), batch_size)):
+        i_end = min(len(data), i + batch_size)
+        batch = data[i:i_end]
+        ids = [f"{x['timestamp']}-{i}" for i, x in batch.iterrows()]
+        texts = [x["text"] for _, x in batch.iterrows()]
+        embeds = embeddings.embed_documents(texts)
+        metadata = [
+            {"text": x["text"], "timestamp": x["timestamp"]}
+            for _, x in batch.iterrows()
+        ]
+        index.upsert(vectors=zip(ids, embeds, metadata))
 
 
 if __name__ == "__main__":
@@ -71,13 +95,4 @@ if __name__ == "__main__":
 
     # get embeddings
     embeddings = OpenAIEmbeddings()
-
-    # insert docs to pinecone index
-    res = get_document(video_id=video_id)
-    docs = split_docs(res)
-
-    vector_store = PineconeLang.from_documents(
-        documents=docs, embedding=embeddings, index_name=vid
-    )
-
-    logger.info(vector_store)
+    upsert_documents_to_pinecone(idx=index, video_id=video_id)
