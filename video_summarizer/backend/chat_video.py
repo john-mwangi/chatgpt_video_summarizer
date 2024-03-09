@@ -6,7 +6,7 @@ import time
 import pandas as pd
 from dotenv import load_dotenv
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores.pinecone import Pinecone as PineconeLang
+from langchain.vectorstores.pinecone import Pinecone as PineconeVectorStore
 from pinecone import Pinecone, PodSpec
 from pinecone.data.index import Index
 from tqdm.auto import tqdm
@@ -121,7 +121,7 @@ def main(video_id: str, delete_index=False, embeddings=OpenAIEmbeddings()):
     )
 
     # use RAG ("text" is from the metadata)
-    vectorstore = PineconeLang(
+    vectorstore = PineconeVectorStore(
         index=index, embedding=embeddings, text_key="text"
     )
 
