@@ -4,16 +4,22 @@ import os
 import time
 
 import pandas as pd
+from dotenv import load_dotenv
 from pinecone import Pinecone, PodSpec
 from pinecone.data.index import Index
 from tqdm.auto import tqdm
 
 from video_summarizer.backend.src.utils import get_mongodb_client, logger
 
+load_dotenv()
+
+PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
+PINECONE_ENVIRONMENT = os.environ.get("PINECONE_ENVIRONMENT")
+
+pc = Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
+
 
 def get_create_pinecone_index(index_name: str):
-
-    pc = Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
 
     available_idx = [i.get("name") for i in pc.list_indexes().get("indexes")]
 
@@ -43,8 +49,17 @@ def get_document(video_id: str):
     return result
 
 
-def upsert_documents_to_pinecone(idx: Index, video_id: str):
+def upsert_documents_to_pinecone(
+    idx: Index, video_id: str, index_name: str, delete=False
+):
     """Inserts document to an index associated with a video id"""
+
+    # delete the index
+    if delete:
+        pc.delete_index(index_name)
+        vector_count = index.describe_index_stats().get("total_vector_count")
+        assert vector_count == 0
+        logger.info("Index successfully deleted")
 
     # check that the index for this video is not empty
     stats = idx.describe_index_stats()
@@ -66,8 +81,8 @@ def upsert_documents_to_pinecone(idx: Index, video_id: str):
     batch_size = 100
     for i in tqdm(range(0, len(data), batch_size)):
         i_end = min(len(data), i + batch_size)
-        batch = data[i:i_end]
-        ids = [f"{x['timestamp']}-{i}" for i, x in batch.iterrows()]
+        batch = data.iloc[i:i_end]
+        ids = [f"{video_id}-{i}" for i, x in batch.iterrows()]
         texts = [x["text"] for _, x in batch.iterrows()]
         embeds = embeddings.embed_documents(texts)
         metadata = [
@@ -78,20 +93,16 @@ def upsert_documents_to_pinecone(idx: Index, video_id: str):
 
 
 if __name__ == "__main__":
-    from dotenv import load_dotenv
     from langchain.embeddings.openai import OpenAIEmbeddings
 
-    load_dotenv()
-
-    PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
-    PINECONE_ENVIRONMENT = os.environ.get("PINECONE_ENVIRONMENT")
-
     video_id = "JEBDfGqrAUA"
-    vid = video_id.lower()
+    index_name = video_id.lower()
 
     # create an index
-    index = get_create_pinecone_index(index_name=vid)
+    index = get_create_pinecone_index(index_name=index_name)
 
     # get embeddings
     embeddings = OpenAIEmbeddings()
-    upsert_documents_to_pinecone(idx=index, video_id=video_id)
+    upsert_documents_to_pinecone(
+        idx=index, video_id=video_id, delete=True, index_name=index_name
+    )
