@@ -80,7 +80,6 @@ def upsert_documents_to_pinecone(idx: Index, video_id: str):
 if __name__ == "__main__":
     from dotenv import load_dotenv
     from langchain.embeddings.openai import OpenAIEmbeddings
-    from langchain.vectorstores.pinecone import Pinecone as PineconeLang
 
     load_dotenv()
 
