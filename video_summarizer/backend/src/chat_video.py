@@ -133,4 +133,23 @@ def main(video_id: str, delete_index=False, embeddings=OpenAIEmbeddings()):
 
 
 if __name__ == "__main__":
-    main(video_id="JEBDfGqrAUA")
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+
+    # VIDEO_ID = "JEBDfGqrAUA"
+    parser.add_argument(
+        "--video_id", help="The video id to chat with", required=True
+    )
+    parser.add_argument(
+        "--delete_index",
+        help="Delete the Pinecone index",
+        action="store_true",
+        default=False,
+    )
+
+    args = parser.parse_args()
+
+    print(args)
+
+    main(video_id=args.video_id, delete_index=args.delete_index)
