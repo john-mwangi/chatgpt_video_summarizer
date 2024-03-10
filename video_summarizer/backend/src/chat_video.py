@@ -2,6 +2,7 @@
 
 import os
 import time
+from uuid import uuid4
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -84,8 +85,8 @@ def upsert_documents_to_pinecone(
     for i in tqdm(range(0, len(data), batch_size)):
         i_end = min(len(data), i + batch_size)
         batch = data.iloc[i:i_end]
-        ids = [f"{video_id}-{i}" for i, x in batch.iterrows()]
-        texts: list[str] = [str(x["text"]) for _, x in batch.iterrows()]
+        ids = [f"{uuid4().hex}" for _ in range(len(batch))]
+        texts = [str(x["text"]) for _, x in batch.iterrows()]
 
         embeds = embeddings.embed_documents(texts)
 
