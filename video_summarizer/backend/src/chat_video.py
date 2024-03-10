@@ -55,7 +55,7 @@ def get_document(video_id: str):
 
 
 def upsert_documents_to_pinecone(
-    idx: Index, video_id: str, index_name: str, embeddings
+    idx: Index, video_id: str, index_name: str, embeddings: OpenAIEmbeddings
 ):
     """Inserts document to an index associated with a video id"""
 
@@ -85,7 +85,7 @@ def upsert_documents_to_pinecone(
         i_end = min(len(data), i + batch_size)
         batch = data.iloc[i:i_end]
         ids = [f"{video_id}-{i}" for i, x in batch.iterrows()]
-        texts = [str(x["text"]) for _, x in batch.iterrows()]
+        texts: list[str] = [str(x["text"]) for _, x in batch.iterrows()]
 
         embeds = embeddings.embed_documents(texts)
 
@@ -94,7 +94,7 @@ def upsert_documents_to_pinecone(
             for _, x in batch.iterrows()
         ]
         idx.upsert(vectors=zip(ids, embeds, metadata))
-        logger.info(f"Successfully added content to {index_name=}")
+    logger.info(f"Successfully added content to {index_name=}")
 
 
 def main(video_id: str, delete_index=False, embeddings=OpenAIEmbeddings()):
