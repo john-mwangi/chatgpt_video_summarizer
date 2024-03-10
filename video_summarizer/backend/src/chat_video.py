@@ -129,7 +129,7 @@ def main(video_id: str, delete_index=False, embeddings=OpenAIEmbeddings()):
     query = "What is vector search?"
     query_res = vectorstore.similarity_search({"query": query, "k": 3})
     # query_res = vectorstore.similarity_search(query=query)
-    print(query_res)
+    logger.info(query_res)
 
 
 if __name__ == "__main__":
@@ -150,6 +150,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    print(args)
+    logger.info(args)
 
     main(video_id=args.video_id, delete_index=args.delete_index)
