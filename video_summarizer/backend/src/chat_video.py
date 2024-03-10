@@ -85,8 +85,9 @@ def upsert_documents_to_pinecone(
     for i in tqdm(range(0, len(data), batch_size)):
         i_end = min(len(data), i + batch_size)
         batch = data.iloc[i:i_end]
-        ids = [f"{uuid4().hex}" for _ in range(len(batch))]
+
         texts = [str(x["text"]) for _, x in batch.iterrows()]
+        ids = [f"{uuid4().hex}" for _ in range(len(texts))]
 
         embeds = embeddings.embed_documents(texts)
 
@@ -94,7 +95,9 @@ def upsert_documents_to_pinecone(
             {"text": str(x["text"]), "timestamp": str(x["timestamp"])}
             for _, x in batch.iterrows()
         ]
+
         idx.upsert(vectors=zip(ids, embeds, metadata))
+
     logger.info(f"Successfully added content to {index_name=}")
 
 
