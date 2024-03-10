@@ -39,17 +39,17 @@ st.write("Enter a list of YouTube channels or videos.")
 st.divider()
 
 channels = [
-    url for url in urls if url.strip().startswith("https://www.youtube.com/@")
+    url for url in urls if url.strip().lower().startswith("https://www.youtube.com/@")
 ]
 
 videos = [
     url
     for url in urls
-    if url.strip().startswith("https://www.youtube.com/watch?v=")
+    if url.strip().lower().startswith("https://www.youtube.com/watch?v=")
 ]
 
 with open(params_path, mode="r") as f:
-    url = yaml.safe_load(f).get("endpoint")
+    endpoint = yaml.safe_load(f).get("endpoint")
 
 if submit:
     if videos or channels:
@@ -61,7 +61,7 @@ if submit:
             "sort_by": sort_by.lower(),
         }
 
-        response = main(url, data)
+        response = main(endpoint, data)
         result = format_response(response)
         st.markdown("".join(result))
 
