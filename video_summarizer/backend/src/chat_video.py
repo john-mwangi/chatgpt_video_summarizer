@@ -87,12 +87,12 @@ def upsert_documents_to_pinecone(
         batch = data.iloc[i:i_end]
 
         texts = [str(x["text"]) for _, x in batch.iterrows()]
-        ids = [f"{uuid4().hex}" for _ in range(len(texts))]
+        ids = [uuid4().hex for _ in range(len(texts))]
 
         embeds = embeddings.embed_documents(texts)
 
         metadata = [
-            {"text": str(x["text"]), "timestamp": str(x["timestamp"])}
+            {"text": x["text"], "timestamp": str(x["timestamp"])}
             for _, x in batch.iterrows()
         ]
 
@@ -101,7 +101,33 @@ def upsert_documents_to_pinecone(
     logger.info(f"Successfully added content to {index_name=}")
 
 
-def main(video_id: str, delete_index=False, embeddings=OpenAIEmbeddings()):
+def query_vectorstore(
+    query: str, embeddings: OpenAIEmbeddings, index: Index, k: int = 5
+) -> str:
+
+    vector = embeddings.embed_query(query)
+
+    query_res = index.query(
+        vector=vector, top_k=k, include_metadata=True, include_values=False
+    )
+
+    logger.info(f"{query=}")
+    logger.info(f"{query_res=}")
+
+    context = [
+        f'{d["metadata"]["text"]} - {d["metadata"]["timestamp"]}'
+        for d in query_res.get("matches")
+    ]
+
+    return "\n".join(context)
+
+
+def main(
+    query: str,
+    video_id: str,
+    delete_index=False,
+    embeddings=OpenAIEmbeddings(),
+):
 
     index_name = video_id.lower()
 
@@ -125,14 +151,13 @@ def main(video_id: str, delete_index=False, embeddings=OpenAIEmbeddings()):
     )
 
     # use RAG ("text" is from the metadata)
-    vectorstore = PineconeVectorStore(
-        index=index, embedding=embeddings, text_key="text"
-    )
-
-    query = "What is vector search?"
-    query_res = vectorstore.similarity_search({"query": query, "k": 3})
+    # vectorstore = PineconeVectorStore(
+    #     index=index, embedding=embeddings, text_key="text"
+    # )
+    # query_res = vectorstore.similarity_search({"query": query, "k": 3})
     # query_res = vectorstore.similarity_search(query=query)
-    logger.info(query_res)
+
+    return query_vectorstore(query, embeddings=embeddings, index=index)
 
 
 if __name__ == "__main__":
@@ -155,4 +180,8 @@ if __name__ == "__main__":
 
     logger.info(args)
 
-    main(video_id=args.video_id, delete_index=args.delete_index)
+    QUERY = "What is a vector store?"
+    res = main(
+        query=QUERY, video_id=args.video_id, delete_index=args.delete_index
+    )
+    print(res)
