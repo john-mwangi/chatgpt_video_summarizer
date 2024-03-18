@@ -128,6 +128,7 @@ def main(
     delete_index=False,
     embeddings=OpenAIEmbeddings(),
 ):
+    """Given a video id and a query, retrieves the vectors that match the query."""
 
     index_name = video_id.lower()
 
