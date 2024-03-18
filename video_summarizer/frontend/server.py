@@ -2,7 +2,6 @@ import requests
 
 
 def main(url: str, data: dict):
-
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
@@ -13,6 +12,8 @@ def main(url: str, data: dict):
 
 
 def card(video_title, video_url, summary):
+    """Generate Bootstrap card html content."""
+
     html = f"""
     <div class="card">
         <div class="card-body">
@@ -27,7 +28,16 @@ def card(video_title, video_url, summary):
     return html
 
 
-def format_response(response, return_html: bool = True) -> list[str]:
+def format_response(
+    response, return_html: bool = True
+) -> tuple[list[str], bool]:
+    """Formats the content into a user friendly format.
+
+    Args:
+    ---
+    response: Response from the API/database
+    return_html: Whether to return html or markdown
+    """
     result = []
     content = response.json()
     summaries = content.get("data").get("summaries")
@@ -49,7 +59,7 @@ def format_response(response, return_html: bool = True) -> list[str]:
 
                 result.append(r)
             result.append("<br>")
-        return result
+        return result, return_html
 
     else:
         for summary in summaries:
@@ -58,4 +68,4 @@ def format_response(response, return_html: bool = True) -> list[str]:
                     r = f"**{k.title()}**: {v}\n\n"
                     result.append(r)
             result.append("*----END OF SUMMARY----*\n\n")
-        return result
+        return result, return_html

@@ -14,6 +14,12 @@ st.sidebar.title("ChatGPT Video Summarizer")
 st.sidebar.image("./www/Gemini_Generated_Image.jpeg", width=None)
 st.sidebar.divider()
 
+sort_by = st.sidebar.selectbox(
+    label="Sort By",
+    options=["Newest", "Popular", "Oldest"],
+    help="Criteria to sort channel videos",
+)
+
 top_n = st.sidebar.number_input(
     label="Top N Videos",
     value=2,
@@ -28,12 +34,6 @@ limit_transcript = st.sidebar.number_input(
     value=0.25,
     step=0.1,
     help="Portion of the video transcript to summarise",
-)
-
-sort_by = st.sidebar.selectbox(
-    label="Sort By",
-    options=["Newest", "Popular", "Oldest"],
-    help="Criteria to sort channel videos",
 )
 
 submit = st.sidebar.button(label="Submit")
@@ -68,8 +68,8 @@ if submit:
         }
 
         response = main(endpoint, data)
-        result = format_response(response)
-        st.markdown("".join(result), unsafe_allow_html=True)
+        result, is_html = format_response(response, return_html=True)
+        st.markdown("".join(result), unsafe_allow_html=is_html)
 
     else:
         st.markdown("Please include at least one video or channel url.")
