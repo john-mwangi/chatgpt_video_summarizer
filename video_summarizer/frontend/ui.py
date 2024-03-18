@@ -39,7 +39,9 @@ st.write("Enter a list of YouTube channels or videos.")
 st.divider()
 
 channels = [
-    url for url in urls if url.strip().lower().startswith("https://www.youtube.com/@")
+    url
+    for url in urls
+    if url.strip().lower().startswith("https://www.youtube.com/@")
 ]
 
 videos = [
@@ -63,7 +65,7 @@ if submit:
 
         response = main(endpoint, data)
         result = format_response(response)
-        st.markdown("".join(result))
+        st.markdown("".join(result), unsafe_allow_html=True)
 
     else:
         st.markdown("Please include at least one video or channel url.")
