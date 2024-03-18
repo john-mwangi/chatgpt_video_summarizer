@@ -12,15 +12,8 @@ from video_summarizer.backend.src.extract_transcript import (
 from video_summarizer.backend.src.utils import get_mongodb_client, logger
 
 
-def init_model():
+def init_model(template: str):
     """Initialise an LLM"""
-
-    template = """system: You are a helpful assistant who provides useful summaries 
-    to a video transcript. The format of the video transcript is `timestamp - dialogue`.
-
-    user: {question}
-    assistant:
-    """
 
     prompt_template = PromptTemplate(
         input_variables=["question"],
@@ -151,7 +144,7 @@ def save_summary(data: dict | list[dict]):
 def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
     load_dotenv()
 
-    model = init_model()
+    model = init_model(configs.prompt_template)
     msgs = []
 
     ModelParams = configs.ModelParams
