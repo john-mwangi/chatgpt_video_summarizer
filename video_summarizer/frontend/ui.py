@@ -68,8 +68,8 @@ if submit:
         }
 
         response = main(endpoint, data)
-        result = format_response(response)
-        st.markdown("".join(result), unsafe_allow_html=True)
+        result, is_html = format_response(response, return_html=True)
+        st.markdown("".join(result), unsafe_allow_html=is_html)
 
     else:
         st.markdown("Please include at least one video or channel url.")
