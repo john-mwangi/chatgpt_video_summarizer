@@ -7,7 +7,6 @@ from uuid import uuid4
 import pandas as pd
 from dotenv import load_dotenv
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores.pinecone import Pinecone as PineconeVectorStore
 from pinecone import Pinecone, PodSpec
 from pinecone.data.index import Index
 from tqdm.auto import tqdm
