@@ -139,7 +139,20 @@ def get_context(
     embeddings=OpenAIEmbeddings(),
     k=15,
 ):
-    """Given a video id and a query, retrieves the vectors that match the query."""
+    """Given a video id and a query, retrieves the vectors that match the query.
+
+    Args:
+    ---
+    query: A user provided query or question
+    video_id: The video id to query from
+    delete_index: Whether to replace the current index with that of a new video id
+    embeddings: The vector embeddings to use
+    k: The number of lines of a transcript to use. The higher the number, the richer the context
+
+    Returns:
+    ---
+    Lines from the transctipt that closest match the query
+    """
 
     index_name = video_id.lower()
 
