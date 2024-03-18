@@ -8,12 +8,7 @@ def main(url: str, data: dict):
         "Content-Type": "application/json",
     }
 
-    resp = requests.post(
-        url,
-        headers=headers,
-        json=data,
-    )
-
+    resp = requests.post(url, headers=headers, json=data)
     return resp
 
 
