@@ -44,11 +44,11 @@ def format_response(
 
     if return_html:
         for summary in summaries:
-            for item in summary:
+            for video in summary:
 
-                video_title = item.get("video_title")
-                video_url = item.get("video_url")
-                video_summary = item.get("summary")
+                video_title = video.get("video_title")
+                video_url = video.get("video_url")
+                video_summary = video.get("summary")
                 video_summary = video_summary.replace("\n", "<br>")
 
                 r = card(
@@ -63,8 +63,8 @@ def format_response(
 
     else:
         for summary in summaries:
-            for item in summary:
-                for k, v in item.items():
+            for video in summary:
+                for k, v in video.items():
                     r = f"**{k.title()}**: {v}\n\n"
                     result.append(r)
             result.append("*----END OF SUMMARY----*\n\n")
