@@ -178,6 +178,8 @@ def main(query: str, video_id: str, delete_index: bool = False):
     logger.info(f"{context=}")
 
     model = init_model(template=augmented_prompt)
+
+    logger.info("Connecting to ChatGPT...")
     res = model.predict(question=query, context=context)
 
     logger.info(res)
