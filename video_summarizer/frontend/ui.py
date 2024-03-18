@@ -38,8 +38,8 @@ limit_transcript = st.sidebar.number_input(
 
 submit = st.sidebar.button(label="Submit")
 
-urls = st_tags(label="YOUTUBE VIDEOS")
-st.write("Enter a list of YouTube channels or videos.")
+urls = st_tags(label="### YOUTUBE VIDEOS")
+st.write("_Enter a list of YouTube channels or videos._")
 st.divider()
 
 channels = [
