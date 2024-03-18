@@ -12,6 +12,20 @@ def main(url: str, data: dict):
     return resp
 
 
+def card(video_title, video_url, summary):
+    html = f"""
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{video_title}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">{video_url}</h6>
+            <p class="card-text">{summary}</p>
+            <a href="#" class="btn btn-primary"><font color="white">Chat this video</font></a>
+        </div>
+    </div>
+    """
+    return html
+
+
 def format_response(response, return_html: bool = True) -> list[str]:
     result = []
     content = response.json()
@@ -20,11 +34,19 @@ def format_response(response, return_html: bool = True) -> list[str]:
     if return_html:
         for summary in summaries:
             for item in summary:
-                for k, v in item.items():
-                    if k == "summary":
-                        v = v.replace("\n", "</br>")
-                    r = f"<b>{k.title()}</b>: {v}<br>"
-                    result.append(r)
+
+                video_title = item.get("video_title")
+                video_url = item.get("video_url")
+                video_summary = item.get("summary")
+                video_summary = video_summary.replace("\n", "<br>")
+
+                r = card(
+                    video_title=video_title,
+                    video_url=video_url,
+                    summary=video_summary,
+                )
+
+                result.append(r)
             result.append("<hr>")
         return result
 
