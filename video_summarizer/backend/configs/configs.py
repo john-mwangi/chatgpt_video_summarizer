@@ -30,6 +30,23 @@ class ModelParams(BaseSettings):
         return ModelParams(**params)
 
 
+prompt_template = """system: You are a helpful assistant who provides useful summaries 
+    to a video transcript. The format of the video transcript is `timestamp - dialogue`.
+
+    user: {question}
+    assistant:
+    """
+
+augmented_prompt = """system: You are a helpful assistant. Please answer the
+    question using the context below:
+    
+    Context: 
+    {context}
+    
+    user: {question}
+    assistant:
+    """
+
 if __name__ == "__main__":
     print(ROOT_DIR)
     print(ModelParams.load().BATCH_CHUNKS)
