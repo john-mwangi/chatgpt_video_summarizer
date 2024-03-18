@@ -48,7 +48,7 @@ def format_response(response, return_html: bool = True) -> list[str]:
                 )
 
                 result.append(r)
-            result.append("<hr>")
+            result.append("<br>")
         return result
 
     else:
