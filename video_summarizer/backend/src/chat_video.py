@@ -11,6 +11,8 @@ from pinecone import Pinecone, PodSpec
 from pinecone.data.index import Index
 from tqdm.auto import tqdm
 
+from video_summarizer.backend.configs.configs import augmented_prompt
+from video_summarizer.backend.src.summarize_video import init_model
 from video_summarizer.backend.src.utils import get_mongodb_client, logger
 
 load_dotenv()
@@ -130,11 +132,12 @@ def query_vectorstore(
     return "\n".join(context)
 
 
-def main(
+def get_context(
     query: str,
     video_id: str,
     delete_index=False,
     embeddings=OpenAIEmbeddings(),
+    k=15,
 ):
     """Given a video id and a query, retrieves the vectors that match the query."""
 
@@ -166,7 +169,20 @@ def main(
     # query_res = vectorstore.similarity_search({"query": query, "k": 3})
     # query_res = vectorstore.similarity_search(query=query)
 
-    return query_vectorstore(query, embeddings=embeddings, index=index, k=15)
+    return query_vectorstore(query, embeddings=embeddings, index=index, k=k)
+
+
+def main(query: str, video_id: str, delete_index: bool = False):
+    context = get_context(query, video_id=video_id, delete_index=delete_index)
+
+    logger.info(f"{context=}")
+
+    model = init_model(template=augmented_prompt)
+    res = model.predict(question=query, context=context)
+
+    logger.info(res)
+
+    return res
 
 
 if __name__ == "__main__":
@@ -190,7 +206,5 @@ if __name__ == "__main__":
     logger.info(args)
 
     QUERY = "What is a vector store?"
-    res = main(
-        query=QUERY, video_id=args.video_id, delete_index=args.delete_index
-    )
+    res = main(QUERY, video_id=args.video_id, delete_index=args.delete_index)
     print(res)
