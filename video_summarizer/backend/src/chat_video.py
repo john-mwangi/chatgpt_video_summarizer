@@ -101,7 +101,11 @@ def upsert_documents_to_pinecone(
 
 
 def query_vectorstore(
-    query: str, embeddings: OpenAIEmbeddings, index: Index, k: int = 5
+    query: str,
+    embeddings: OpenAIEmbeddings,
+    index: Index,
+    k: int = 5,
+    include_timestamp: bool = False,
 ) -> str:
 
     vector = embeddings.embed_query(query)
@@ -117,6 +121,11 @@ def query_vectorstore(
         f'{d["metadata"]["text"]} - {d["metadata"]["timestamp"]}'
         for d in query_res.get("matches")
     ]
+
+    if include_timestamp is False:
+        context = [
+            f'{d["metadata"]["text"]}' for d in query_res.get("matches")
+        ]
 
     return "\n".join(context)
 
@@ -157,7 +166,7 @@ def main(
     # query_res = vectorstore.similarity_search({"query": query, "k": 3})
     # query_res = vectorstore.similarity_search(query=query)
 
-    return query_vectorstore(query, embeddings=embeddings, index=index)
+    return query_vectorstore(query, embeddings=embeddings, index=index, k=15)
 
 
 if __name__ == "__main__":
