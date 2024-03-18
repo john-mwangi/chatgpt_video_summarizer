@@ -37,6 +37,16 @@ prompt_template = """system: You are a helpful assistant who provides useful sum
     assistant:
     """
 
+augmented_prompt = """system: You are a helpful assistant. Please answer the
+    question using the context below:
+    
+    Context: 
+    {context}
+    
+    user: {question}
+    assistant:
+    """
+
 if __name__ == "__main__":
     print(ROOT_DIR)
     print(ModelParams.load().BATCH_CHUNKS)
