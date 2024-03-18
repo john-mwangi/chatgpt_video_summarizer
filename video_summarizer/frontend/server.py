@@ -19,7 +19,8 @@ def card(video_title, video_url, summary):
             <h5 class="card-title">{video_title}</h5>
             <h6 class="card-subtitle mb-2 text-muted">{video_url}</h6>
             <p class="card-text">{summary}</p>
-            <a href="#" class="btn btn-primary"><font color="white">Chat this video</font></a>
+            <a href="{video_url}" title="Watch this video on YouTube" class="btn btn-primary"><font color="white">Watch</font></a>
+            <a href="#" title="Chat this video with ChatGPT" class="btn btn-primary"><font color="white">Chat</font></a>
         </div>
     </div>
     """
