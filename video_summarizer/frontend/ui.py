@@ -5,6 +5,10 @@ from streamlit_tags import st_tags
 from video_summarizer.backend.configs.configs import params_path
 from video_summarizer.frontend.server import format_response, main
 
+# https://getbootstrap.com/docs/5.0/getting-started/introduction/
+css = """<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">"""
+st.markdown(css, unsafe_allow_html=True)
+
 st.sidebar.title("ChatGPT Video Summarizer")
 
 st.sidebar.image("./www/Gemini_Generated_Image.jpeg", width=None)
@@ -39,7 +43,9 @@ st.write("Enter a list of YouTube channels or videos.")
 st.divider()
 
 channels = [
-    url for url in urls if url.strip().lower().startswith("https://www.youtube.com/@")
+    url
+    for url in urls
+    if url.strip().lower().startswith("https://www.youtube.com/@")
 ]
 
 videos = [
@@ -63,7 +69,7 @@ if submit:
 
         response = main(endpoint, data)
         result = format_response(response)
-        st.markdown("".join(result))
+        st.markdown("".join(result), unsafe_allow_html=True)
 
     else:
         st.markdown("Please include at least one video or channel url.")
