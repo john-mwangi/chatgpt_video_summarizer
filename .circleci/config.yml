@@ -10,9 +10,9 @@ executors:
       IMAGE_TAG: johnm01/video_summarizer:latest
     docker:
       - image: cimg/python:3.10-node
-      auth:
-        username: $DOCKERHUB_USERNAME
-        password: $DOCKERHUB_PASSWORD
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
 
 jobs:
   test-python:
@@ -28,17 +28,17 @@ jobs:
           command: poetry run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')
       - store_test_results:
           path: junit.xml
-  
+
   build-docker:
     executor: docker-publisher
     steps:
-      — checkout
-      — setup_remote_docker
-      — run:
+      - checkout
+      - setup_remote_docker
+      - run:
           name: Build the Docker image
           command: docker build --tag "${IMAGE_TAG}" .
       - run:
-          name: Save Docker image locally
+          name: Save the Docker image locally
           command: docker save --output image.tar "${IMAGE_TAG}"
       - persist_to_workspace:
           root: .
