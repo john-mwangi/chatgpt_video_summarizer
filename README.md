@@ -31,8 +31,16 @@ db.createUser(
 )
 ```
 ## Usage
+### Build the Docker container
+**Option 1**
+- Clone this repo
 - Build the Docker container: `DOCKER_BUILDKIT=1 docker build -f Dockerfile -t video_summarizer .`
-- Run the Docker container: `docker run -p 8501:8501 -p 12000:12000 video_summarizer`
+**Option 2**
+- Run: `docker pull --platform=linux/arm64 johnmw01/video_summarizer:latest`
+
+### Run the container
+- Create a `.env` with your credentials
+- Run the Docker container: `docker run --env-file .env -p 8501:8501 -p 12000:12000 video_summarizer`
 - Access the app: `http://0.0.0.0:8501/`
 - Enter a channel url or video url to the api
 - Video summaries will be saved in the database and display on the app
