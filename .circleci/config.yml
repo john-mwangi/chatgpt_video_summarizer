@@ -70,20 +70,23 @@ jobs:
           command: '#e.g. ./deploy.sh'
 workflows:
   build-and-test:
-    filters:
-      branches:
-        only: main
     jobs:
-      - test-python
+      - test-python:
+          filters:
+            branches:
+              only: main
       - build-docker:
           requires:
             - test-python
-          # filters:
-          #   branches:
-          #     only: main
+          filters:
+            branches:
+              only: main
       - push-docker:
           requires:
             - build-docker
+          filters:
+            branches:
+              only: main
       # - deploy:
       #     requires:
       #       - test-python
