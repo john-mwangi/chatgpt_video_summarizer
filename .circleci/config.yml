@@ -9,7 +9,7 @@ executors:
     environment:
       IMAGE_TAG: johnm01/video_summarizer:latest
     docker:
-      - image: cimg/python:3.10-node
+      - image: python:3.10-slim
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
@@ -17,8 +17,9 @@ executors:
 jobs:
   test-python:
     # Install dependencies and run tests
-    docker:
-      - image: cimg/python:3.10-node
+    # docker:
+    #   - image: cimg/python:3.10-node
+    executor: docker-publisher
     steps:
       - checkout
       - python/install-packages:
