@@ -41,7 +41,7 @@ db.createUser(
 
 ### Run the container
 - Create a `.env` with your credentials
-- Run the Docker container: `docker run --env-file .env -p 8501:8501 -p 12000:12000 video_summarizer`
+- Run the Docker container: `docker run --env-file ./docker.env -p 8501:8501 -p 12000:12000 video_summarizer`
 - Access the app: `http://0.0.0.0:8501/`
 - Enter a channel url or video url to the api
 - Video summaries will be saved in the database and display on the app
