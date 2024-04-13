@@ -9,10 +9,14 @@ executors:
     environment:
       IMAGE_TAG: johnm01/video_summarizer:latest
     docker:
-      - image: cimg/python:3.10-node
+      - image: python:3.10-slim
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
+        command: /bin/sh -c "apt-get update && \
+                    apt-get install -y gcc && \
+                    pip install poetry==1.7.1 && \
+                    poetry install"
 
 jobs:
   test-python:
