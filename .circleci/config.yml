@@ -75,7 +75,7 @@ workflows:
       - test-python
       - build-docker:
           requires:
-            - build-and-test
+            - test-python
           # filters:
           #   branches:
               # only: main
