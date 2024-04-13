@@ -3,6 +3,17 @@
 version: 2.1
 orbs:
   python: circleci/python@2
+
+executors:
+  docker-publisher:
+    environment:
+      IMAGE_TAG: johnm01/video_summarizer:latest
+    docker:
+      - image: cimg/python:3.10-node
+      auth:
+        username: $DOCKERHUB_USERNAME
+        password: $DOCKERHUB_PASSWORD
+
 jobs:
   test-python:
     # Install dependencies and run tests
@@ -17,6 +28,38 @@ jobs:
           command: poetry run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')
       - store_test_results:
           path: junit.xml
+  
+  build-docker:
+    executor: docker-publisher
+    steps:
+      — checkout
+      — setup_remote_docker
+      — run:
+          name: Build the Docker image
+          command: docker build --tag "${IMAGE_TAG}" .
+      - run:
+          name: Save Docker image locally
+          command: docker save --output image.tar "${IMAGE_TAG}"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./image.tar
+
+  push-docker:
+    executor: docker-publisher
+    steps:
+      - setup_remote_docker
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Load Docker image
+          command: docker load --input /tmp/workspace/image.tar
+      - run: 
+          name: Publish Docker image to Docker Hub
+          command: |
+            echo "${DOCKERHUB_PASSWORD}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+            docker push "${IMAGE_TAG}"
+
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -33,3 +76,15 @@ workflows:
     # - deploy:
     #     requires:
     #       - test-python
+  docker-build-and-publish:
+    jobs:
+      - build-docker
+          # filters:
+          #   branches:
+              # only: main
+      - push-docker:
+          requires:
+            - build-docker
+          # filters:
+          #   branches:
+              # only: main
