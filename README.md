@@ -31,8 +31,9 @@ db.createUser(
 )
 ```
 ## Usage
-- Run the api: `uvicorn api:app --host 0.0.0.0 --port 12000`
-- Run the webapp: `streamlit run ui.py`
+- Build the Docker container: `DOCKER_BUILDKIT=1 docker build -f Dockerfile -t video_summarizer .`
+- Run the Docker container: `docker run -p 8501:8501 -p 12000:12000 video_summarizer`
+- Access the app: `http://0.0.0.0:8501/`
 - Enter a channel url or video url to the api
 - Video summaries will be saved in the database and display on the app
 
