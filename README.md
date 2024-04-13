@@ -35,6 +35,7 @@ db.createUser(
 **Option 1**
 - Clone this repo
 - Build the Docker container: `DOCKER_BUILDKIT=1 docker build -f Dockerfile -t video_summarizer .`
+
 **Option 2**
 - Run: `docker pull --platform=linux/arm64 johnmw01/video_summarizer:latest`
 
