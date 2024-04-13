@@ -1,0 +1,7 @@
+.circleci
+.gitignore
+__pycache__
+.mypy_cache
+.git
+.DS_Store
+.dockerignore
