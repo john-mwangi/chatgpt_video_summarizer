@@ -17,8 +17,6 @@ executors:
 jobs:
   test-python:
     # Install dependencies and run tests
-    # docker:
-    #   - image: cimg/python:3.10-node
     executor: docker-publisher
     steps:
       - checkout
@@ -72,6 +70,9 @@ jobs:
           command: '#e.g. ./deploy.sh'
 workflows:
   build-and-test:
+    filters:
+      branches:
+        only: main
     jobs:
       - test-python
       - build-docker:
@@ -79,13 +80,10 @@ workflows:
             - test-python
           # filters:
           #   branches:
-              # only: main
+          #     only: main
       - push-docker:
           requires:
             - build-docker
-          # filters:
-          #   branches:
-              # only: main
       # - deploy:
       #     requires:
       #       - test-python
