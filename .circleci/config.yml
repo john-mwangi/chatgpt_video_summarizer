@@ -73,12 +73,9 @@ workflows:
   build-and-test:
     jobs:
       - test-python
-    # - deploy:
-    #     requires:
-    #       - test-python
-  docker-build-and-publish:
-    jobs:
-      - build-docker
+      - build-docker:
+          requires:
+            - build-and-test
           # filters:
           #   branches:
               # only: main
@@ -88,3 +85,6 @@ workflows:
           # filters:
           #   branches:
               # only: main
+      # - deploy:
+      #     requires:
+      #       - test-python
