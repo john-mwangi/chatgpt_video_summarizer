@@ -47,4 +47,4 @@ db.createUser(
 - Video summaries will be saved in the database and display on the app
 
 ## Web App
-![Sample video summary](./webapp_ss.png)
+![Sample video summary](./app_ss.png)
