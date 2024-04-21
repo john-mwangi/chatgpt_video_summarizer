@@ -49,6 +49,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=get_logging_level(),
 )
+
 logger = logging.getLogger()
 
 if __name__ == "__main__":
