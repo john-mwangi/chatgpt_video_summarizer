@@ -9,7 +9,7 @@ from video_summarizer.backend.src.extract_transcript import (
     get_transcript_from_db,
     get_video_title,
 )
-from video_summarizer.backend.src.utils import get_mongodb_client, logger
+from video_summarizer.backend.utils.utils import get_mongodb_client, logger
 
 
 def init_model(template: str):

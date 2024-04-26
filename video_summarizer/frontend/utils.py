@@ -1,6 +1,6 @@
 from pydantic import BaseModel, HttpUrl
 
-from video_summarizer.backend.src.utils import logger
+from video_summarizer.backend.utils.utils import logger
 
 
 class Url(BaseModel):

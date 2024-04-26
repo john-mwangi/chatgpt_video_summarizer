@@ -6,7 +6,7 @@ from video_summarizer.backend.src.extract_transcript import (
     main as extract_main,
 )
 from video_summarizer.backend.src.summarize_video import main as summarise_main
-from video_summarizer.backend.src.utils import logger
+from video_summarizer.backend.utils.utils import logger
 
 
 def get_videos_from_channel(
