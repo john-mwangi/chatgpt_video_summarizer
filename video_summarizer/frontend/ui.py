@@ -56,7 +56,7 @@ videos = [
 ]
 
 with open(params_path, mode="r") as f:
-    endpoint = yaml.safe_load(f).get("endpoint")
+    endpoint = yaml.safe_load(f)["endpoint"]["url"]
 
 if submit:
     submitted_urls = set(channels + videos)

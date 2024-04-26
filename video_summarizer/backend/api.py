@@ -7,7 +7,16 @@ from main import main
 from pydantic import BaseModel
 
 from video_summarizer.backend.configs import configs
-from video_summarizer.backend.src.utils import logger
+from video_summarizer.backend.utils.auth import Token
+from video_summarizer.backend.utils.utils import logger
+
+config = configparser.ConfigParser()
+config.read(configs.ROOT_DIR / "pyproject.toml")
+version = config["tool.poetry"]["version"].replace('"', "")
+description = config["tool.poetry"]["description"].replace('"', "")
+
+with open(configs.params_path, mode="r") as f:
+    API_PREFIX = yaml.safe_load(f)["endpoint"]["api_prefix"]
 
 
 class VideoUrls(BaseModel):
@@ -17,11 +26,6 @@ class VideoUrls(BaseModel):
     top_n: int = 2
     sort_by: str = "newest"
 
-
-config = configparser.ConfigParser()
-config.read(configs.ROOT_DIR / "pyproject.toml")
-version = config["tool.poetry"]["version"].replace('"', "")
-description = config["tool.poetry"]["description"].replace('"', "")
 
 app = FastAPI(
     title="ChatGPT Video Summarizer", description=description, version=version
@@ -73,4 +77,4 @@ def fetch_video_summary(video_urls: VideoUrls):
 
 
 # Mount the router on the app
-app.include_router(router_v1, prefix="/api/v1")
+app.include_router(router_v1, prefix=API_PREFIX)
