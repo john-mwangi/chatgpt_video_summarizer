@@ -1,12 +1,15 @@
 import configparser
+from typing import Annotated
 
 import yaml
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from main import main
 from pydantic import BaseModel
 
 from video_summarizer.backend.configs import configs
+from video_summarizer.backend.utils import auth
 from video_summarizer.backend.utils.auth import Token
 from video_summarizer.backend.utils.utils import logger
 
@@ -31,6 +34,19 @@ app = FastAPI(
     title="ChatGPT Video Summarizer", description=description, version=version
 )
 router_v1 = APIRouter()
+
+
+@router_v1.post(path="/login")
+def login_with_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+) -> Token:
+    """Log in with a username and an access token"""
+
+    user_name = form_data.username
+    password = form_data.password
+    secret = form_data.client_secret
+    token = auth.create_access_token(data={"sub": user_name})
+    return Token(token=token, token_type="bearer")
 
 
 @router_v1.post(path="/summarize_video")
