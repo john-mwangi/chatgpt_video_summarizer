@@ -18,8 +18,7 @@ config.read(configs.ROOT_DIR / "pyproject.toml")
 version = config["tool.poetry"]["version"].replace('"', "")
 description = config["tool.poetry"]["description"].replace('"', "")
 
-with open(configs.params_path, mode="r") as f:
-    API_PREFIX = yaml.safe_load(f)["endpoint"]["api_prefix"]
+API_PREFIX = configs.ApiSettings.load_settings().api_prefix
 
 
 class VideoUrls(BaseModel):

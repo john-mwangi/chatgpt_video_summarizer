@@ -12,14 +12,13 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from video_summarizer.backend.configs import configs
-
-with open(configs.params_path, "r") as f:
-    params = yaml.safe_load(f)["endpoint"]
+from video_summarizer.backend.configs.configs import ApiSettings
 
 SECRET_KEY = os.environ["SECRET_KEY"]
-ALGORITHM = params["algorithm"]
-ACCESS_TOKEN_EXPIRE_MINUTES = params["access_token_expire_minutes"]
+ALGORITHM = ApiSettings.load_settings().algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = (
+    ApiSettings.load_settings().access_token_expire_minutes
+)
 
 
 fake_users_db = {

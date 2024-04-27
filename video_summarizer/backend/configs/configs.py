@@ -30,6 +30,18 @@ class ModelParams(BaseSettings):
         return ModelParams(**params)
 
 
+class ApiSettings(BaseSettings):
+    url: str
+    api_prefix: str
+    algorithm: str
+    access_token_expire_minutes: int
+
+    def load_settings():
+        with open(params_path, "r") as f:
+            api_settings = yaml.safe_load(f)["endpoint"]
+            return ApiSettings(**api_settings)
+
+
 prompt_template = """system: You are a helpful assistant who provides useful summaries 
     to a video transcript. The format of the video transcript is `timestamp - dialogue`.
 
