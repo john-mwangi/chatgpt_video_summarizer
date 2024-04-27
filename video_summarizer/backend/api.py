@@ -2,7 +2,7 @@ import configparser
 from typing import Annotated
 
 import yaml
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from main import main
