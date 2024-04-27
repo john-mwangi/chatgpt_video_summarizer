@@ -39,17 +39,17 @@ router_v1 = APIRouter()
 def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> auth.Token:
+    """Logs in a user using a username and password"""
+
     user = auth.authenticate_user(
         fake_db=auth.fake_users_db,
         username=form_data.username,
         password=form_data.password,
     )
+
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise auth.credentials_exception
+
     access_token = auth.create_access_token(data={"sub": user.username})
     return auth.Token(access_token=access_token, token_type="bearer")
 

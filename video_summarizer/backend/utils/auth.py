@@ -19,6 +19,16 @@ ALGORITHM = ApiSettings.load_settings().algorithm
 TOKEN_EXPIRY = ApiSettings.load_settings().access_token_expire_minutes
 API_PREFIX = ApiSettings.load_settings().api_prefix
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/token")
+
+credentials_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Incorrect username or password",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+
+# TODO: use Firebase
 fake_users_db = {
     "johndoe": {
         "username": "johndoe",
@@ -50,16 +60,6 @@ class UserInDB(User):
     hashed_password: str
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/token")
-
-credentials_exception = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Incorrect username or password",
-    headers={"WWW-Authenticate": "Bearer"},
-)
-
-
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -75,8 +75,10 @@ def authenticate_user(
 ):
     user = get_user(fake_db, username)
     if not user:
+        logger.info(f"{username=} does not exist")
         return False
     if not verify_password(password, user.hashed_password):
+        logger.info(f"{username=} provided an incorrect password")
         return False
     return user
 
@@ -89,6 +91,7 @@ def create_access_token(
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    logger.debug(f"{encoded_jwt=}")
     return encoded_jwt
 
 
