@@ -2,7 +2,7 @@ import streamlit as st
 import yaml
 from streamlit_tags import st_tags
 
-from video_summarizer.backend.configs.configs import params_path
+from video_summarizer.backend.configs.config import params_path
 from video_summarizer.frontend.server import format_response, main
 from video_summarizer.frontend.utils import validate_url
 

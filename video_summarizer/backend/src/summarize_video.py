@@ -4,11 +4,9 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from tqdm import tqdm
 
-from video_summarizer.backend.configs import configs
+from video_summarizer.backend.configs import config
 from video_summarizer.backend.src.extract_transcript import (
-    get_transcript_from_db,
-    get_video_title,
-)
+    get_transcript_from_db, get_video_title)
 from video_summarizer.backend.utils.utils import get_mongodb_client, logger
 
 
@@ -21,7 +19,7 @@ def init_model(template: str):
     )
 
     model = LLMChain(
-        llm=ChatOpenAI(model=configs.ModelParams.load().MODEL),
+        llm=ChatOpenAI(model=config.ModelParams.load().MODEL),
         prompt=prompt_template,
     )
 
@@ -63,7 +61,7 @@ def check_if_summarised(video_id: str) -> tuple[bool, None | str]:
         is_summarised = True
 
         data = {}
-        for k in configs.video_keys:
+        for k in config.video_keys:
             data[k] = result.get(k)
 
     return is_summarised, data
@@ -144,10 +142,10 @@ def save_summary(data: dict | list[dict]):
 def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
     load_dotenv()
 
-    model = init_model(configs.prompt_template)
+    model = init_model(config.prompt_template)
     msgs = []
 
-    ModelParams = configs.ModelParams
+    ModelParams = config.ModelParams
 
     is_summarised, data = check_if_summarised(video_id)
 
@@ -167,7 +165,7 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
         }
 
         missing_keys = []
-        for k in configs.video_keys:
+        for k in config.video_keys:
             if k not in data and k != "summary":
                 missing_keys.append(k)
 
@@ -220,7 +218,7 @@ def main(LIMIT_TRANSCRIPT: int | float | None, video_id: str):
 
         save_summary(data)
 
-        res = {k: v for k, v in data.items() if k in configs.video_keys}
+        res = {k: v for k, v in data.items() if k in config.video_keys}
         msgs.append(res)
 
     return msgs

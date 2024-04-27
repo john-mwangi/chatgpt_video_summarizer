@@ -11,7 +11,7 @@ from pinecone import Pinecone, PodSpec
 from pinecone.data.index import Index
 from tqdm.auto import tqdm
 
-from video_summarizer.backend.configs.configs import augmented_prompt
+from video_summarizer.backend.configs.config import augmented_prompt
 from video_summarizer.backend.src.summarize_video import init_model
 from video_summarizer.backend.utils.utils import get_mongodb_client, logger
 
