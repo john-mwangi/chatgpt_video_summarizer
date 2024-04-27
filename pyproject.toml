@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "video_summarizer"
-version = "0.1.0"
+version = "0.2.0"
 description = "Summarise videos using Gen AI"
 authors = ["John Mwangi <mail.mwangi@gmail.com>"]
 readme = "README.md"
