@@ -18,7 +18,7 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 
 class Token(BaseModel):
     token: str
-    token_type: type
+    token_type: str
 
 
 class TokenData(BaseModel):
