@@ -33,24 +33,25 @@ class VideoUrls(BaseModel):
 app = FastAPI(
     title="ChatGPT Video Summarizer", description=description, version=version
 )
+
 router_v1 = APIRouter()
 
 
-@router_v1.post(path="/login")
-def login_with_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+@router_v1.post("/token")
+def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
-    """Log in with a username and an access token"""
-
-    user_name = form_data.username
-    password = form_data.password
-    secret = form_data.client_secret
-    token = auth.create_access_token(data={"sub": user_name})
-    return Token(token=token, token_type="bearer")
+    user = auth.authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise auth.credentials_exception
+    access_token = auth.create_access_token(data={"sub": user.username})
+    return Token(access_token=access_token, token_type="bearer")
 
 
 @router_v1.post(path="/summarize_video")
-def fetch_video_summary(video_urls: VideoUrls):
+def fetch_video_summary(
+    video_urls: Annotated[VideoUrls, Depends(auth.get_current_active_user)]
+):
     """Summarize a video using AI:
 
     Args:
