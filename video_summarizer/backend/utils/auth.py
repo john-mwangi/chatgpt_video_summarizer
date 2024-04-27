@@ -5,21 +5,19 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-import yaml
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from video_summarizer.backend.configs.configs import ApiSettings
+from video_summarizer.backend.configs.config import ApiSettings
+from video_summarizer.backend.utils.utils import logger
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = ApiSettings.load_settings().algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = (
-    ApiSettings.load_settings().access_token_expire_minutes
-)
-
+TOKEN_EXPIRY = ApiSettings.load_settings().access_token_expire_minutes
+API_PREFIX = ApiSettings.load_settings().api_prefix
 
 fake_users_db = {
     "johndoe": {
@@ -53,8 +51,7 @@ class UserInDB(User):
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/token")
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -67,12 +64,8 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-
-def get_user(db, username: str):
-    if username in db:
+def get_user(db: dict, username: str):
+    if username in db.keys():
         user_dict = db[username]
         return UserInDB(**user_dict)
 
@@ -90,7 +83,7 @@ def authenticate_user(
 
 def create_access_token(
     data: dict,
-    expires_delta: timedelta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    expires_delta: timedelta = timedelta(minutes=TOKEN_EXPIRY),
 ):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta

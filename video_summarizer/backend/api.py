@@ -2,23 +2,22 @@ import configparser
 from typing import Annotated
 
 import yaml
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from main import main
 from pydantic import BaseModel
 
-from video_summarizer.backend.configs import configs
+from video_summarizer.backend.configs import config
 from video_summarizer.backend.utils import auth
-from video_summarizer.backend.utils.auth import Token
 from video_summarizer.backend.utils.utils import logger
 
-config = configparser.ConfigParser()
-config.read(configs.ROOT_DIR / "pyproject.toml")
-version = config["tool.poetry"]["version"].replace('"', "")
-description = config["tool.poetry"]["description"].replace('"', "")
+API_PREFIX = config.ApiSettings.load_settings().api_prefix
 
-API_PREFIX = configs.ApiSettings.load_settings().api_prefix
+parser = configparser.ConfigParser()
+parser.read(config.ROOT_DIR / "pyproject.toml")
+version = parser["tool.poetry"]["version"].replace('"', "")
+description = parser["tool.poetry"]["description"].replace('"', "")
 
 
 class VideoUrls(BaseModel):
@@ -39,12 +38,20 @@ router_v1 = APIRouter()
 @router_v1.post("/token")
 def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-) -> Token:
-    user = auth.authenticate_user(form_data.username, form_data.password)
+) -> auth.Token:
+    user = auth.authenticate_user(
+        fake_db=auth.fake_users_db,
+        username=form_data.username,
+        password=form_data.password,
+    )
     if not user:
-        raise auth.credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     access_token = auth.create_access_token(data={"sub": user.username})
-    return Token(access_token=access_token, token_type="bearer")
+    return auth.Token(access_token=access_token, token_type="bearer")
 
 
 @router_v1.post(path="/summarize_video")
@@ -67,7 +74,7 @@ def fetch_video_summary(
     A list of video summaries
     """
 
-    with open(configs.params_path, "r") as f:
+    with open(config.params_path, "r") as f:
         responses = yaml.safe_load(f).get("responses")
 
     try:
@@ -81,13 +88,13 @@ def fetch_video_summary(
 
         data = {"data": {"summaries": summaries}}
         status = responses.get("SUCCESS")
-        status_code = configs.statuses.SUCCESS.value
+        status_code = config.statuses.SUCCESS.value
 
     except Exception as e:
         logger.exception(e)
         data = {"summaries": None}
         status = responses.get("ERROR")
-        status_code = configs.statuses.ERROR.value
+        status_code = config.statuses.ERROR.value
 
     return JSONResponse(content={**data, **status}, status_code=status_code)
 
