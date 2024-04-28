@@ -2,6 +2,7 @@
 a valid username and password in order to obtain an JWT access token."""
 
 import os
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
@@ -21,12 +22,17 @@ API_PREFIX = ApiSettings.load_settings().api_prefix
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/token")
-secret_key = APIKeyHeader(name="X-API-Key", scheme_name="Secret header")
+secret_key = APIKeyHeader(name="Authorization", scheme_name="Bearer")
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Incorrect username or password",
     headers={"WWW-Authenticate": "Bearer"},
+)
+
+apikey_exception = HTTPException(
+    status_code=status.HTTP_403_FORBIDDEN,
+    detail=f"Invalid API key provided",
 )
 
 # TODO: use Firebase
@@ -93,7 +99,7 @@ def create_access_token(
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    logger.debug(f"{encoded_jwt=}")
+    logger.info(f"{encoded_jwt=}")
     return encoded_jwt
 
 
@@ -126,16 +132,19 @@ def get_current_active_user(
 
 
 def validate_api_key(api_key: Annotated[str, Depends(secret_key)]):
-
     # Swagger UI will accept any key but the validation happens server-side
-    if api_key not in fake_users_db.get("api_keys"):
-        logger.info(f"Invalid API key: {api_key}")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid API key provided",
-        )
+    matches = re.match(pattern=r"Bearer\s(.*)", string=api_key)
 
-    return True
+    if matches is None:
+        logger.info("No API key was provided")
+        raise apikey_exception
+
+    elif matches[1] not in fake_users_db.get("api_keys"):
+        logger.info(f"Invalid API key: {api_key}")
+        raise apikey_exception
+
+    else:
+        return True
 
 
 if __name__ == "__main__":
@@ -152,8 +161,8 @@ if __name__ == "__main__":
     print(hashed_password1, hashed_password2)
     print(is_valid1, is_valid2)
 
-    headers_success = {"X-API-Key": "f7099f6f0f4caa6cf63b88e8d3e7"}
-    headers_fail = {"X-API-Key": "inexistent_key"}
+    headers_success = {"Authorization": "Bearer f7099f6f0f4caa6cf63b88e8d3e7"}
+    headers_fail = {"Authorization": "Bearer inexistent_key"}
 
     resp_success = requests.get(
         url="http://0.0.0.0:12000/api/v1/items?something=value_to_return",
@@ -167,5 +176,3 @@ if __name__ == "__main__":
 
     assert resp_success.status_code == status.HTTP_200_OK
     assert resp_fail.status_code == status.HTTP_403_FORBIDDEN
-
-    print(resp_success.json())
