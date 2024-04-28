@@ -104,11 +104,6 @@ def create_access_token(
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -140,7 +135,7 @@ def validate_api_key(api_key: Annotated[str, Depends(secret_key)]):
         raise apikey_exception
 
     elif matches[1] not in fake_users_db.get("api_keys"):
-        logger.info(f"Invalid API key: {api_key}")
+        logger.info(f"Invalid API key: {matches[1}")
         raise apikey_exception
 
     else:
