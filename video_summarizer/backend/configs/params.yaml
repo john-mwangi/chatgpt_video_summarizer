@@ -16,3 +16,4 @@ endpoint:
   api_prefix: /api/v1
   algorithm: HS256
   access_token_expire_minutes: 30
+  authentication: password # password or api_key
