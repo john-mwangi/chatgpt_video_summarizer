@@ -27,7 +27,7 @@ secret_key = APIKeyHeader(name="Authorization", scheme_name="Bearer")
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Incorrect username or password",
-    headers={"WWW-Authenticate": "Bearer"},
+    headers={"Authorization": "Bearer"},
 )
 
 apikey_exception = HTTPException(
