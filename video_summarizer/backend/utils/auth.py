@@ -126,6 +126,8 @@ def get_current_active_user(
 
 
 def validate_api_key(api_key: Annotated[str, Depends(secret_key)]):
+
+    # Swagger UI will accept any key but the validation happens server-side
     if api_key not in fake_users_db.get("api_keys"):
         logger.info(f"Invalid API key: {api_key}")
         raise HTTPException(
