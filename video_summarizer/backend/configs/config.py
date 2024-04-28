@@ -2,6 +2,7 @@ from enum import Enum
 from pathlib import Path
 
 import yaml
+from fastapi import status
 from pydantic_settings import BaseSettings
 
 ROOT_DIR = Path(__file__).parent.parent.parent.parent.resolve()
@@ -11,9 +12,9 @@ video_keys = ["video_id", "video_url", "video_title", "summary"]
 
 
 class statuses(Enum):
-    SUCCESS = 200
-    ERROR = 400
-    NOT_FOUND = 404
+    SUCCESS = status.HTTP_200_OK
+    ERROR = status.HTTP_400_BAD_REQUEST
+    NOT_FOUND = status.HTTP_404_NOT_FOUND
 
 
 class ModelParams(BaseSettings):
