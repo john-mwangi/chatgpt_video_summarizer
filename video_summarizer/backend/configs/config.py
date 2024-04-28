@@ -36,7 +36,6 @@ class ApiSettings(BaseSettings):
     api_prefix: str
     algorithm: str
     access_token_expire_minutes: int
-    authentication: str
 
     def load_settings():
         with open(params_path, "r") as f:
