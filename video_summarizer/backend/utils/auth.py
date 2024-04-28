@@ -36,6 +36,7 @@ fake_users_db = {
         "email": "johndoe@example.com",
         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
         "disabled": False,
+        "api_key": "f7099f6f0f4caa6cf63b88e8d3e7",
     }
 }
 
@@ -58,6 +59,7 @@ class User(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
+    api_key: str
 
 
 def verify_password(plain_password, hashed_password):
@@ -121,3 +123,16 @@ def get_current_active_user(
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+if __name__ == "__main__":
+    hashed_password1 = pwd_context.hash(secret="secret")
+    hashed_password2 = (
+        "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"
+    )
+
+    is_valid1 = pwd_context.verify("secret", hashed_password1)
+    is_valid2 = pwd_context.verify("secret", hashed_password2)
+
+    print(hashed_password1, hashed_password2)
+    print(is_valid1, is_valid2)
