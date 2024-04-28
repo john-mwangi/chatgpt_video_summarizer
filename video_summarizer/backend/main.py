@@ -59,7 +59,7 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str]:
     elif len(v_urls) == 0 and len(channels) > 0:
         return urls
     elif len(channels) == 0 and len(v_urls) == 0:
-        raise ValueError("Update video_urls.yaml")
+        return []
     else:
         urls.extend(v_urls)
         return set(urls)
