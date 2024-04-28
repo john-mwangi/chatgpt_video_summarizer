@@ -128,7 +128,7 @@ def get_current_active_user(
 
 def validate_api_key(api_key: Annotated[str, Depends(secret_key)]):
     # Swagger UI will accept any key but the validation happens server-side
-    matches = re.match(pattern=r"Bearer\s(.*)", string=api_key)
+    matches = re.match(pattern=r"Bearer\s(\w+)", string=api_key)
 
     if matches is None:
         logger.info("No API key was provided")
