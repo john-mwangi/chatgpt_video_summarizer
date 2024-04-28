@@ -54,10 +54,11 @@ def login_for_access_token(
     return auth.Token(access_token=access_token, token_type="bearer")
 
 
-@router_v1.post(path="/summarize_video")
-def fetch_video_summary(
-    video_urls: Annotated[VideoUrls, Depends(auth.get_current_active_user)]
-):
+@router_v1.post(
+    path="/summarize_video",
+    dependencies=[Depends(auth.get_current_active_user)],
+)
+def fetch_video_summary(video_urls: VideoUrls):
     """Summarize a video using AI:
 
     Args:
