@@ -135,7 +135,7 @@ def validate_api_key(api_key: Annotated[str, Depends(secret_key)]):
         raise apikey_exception
 
     elif matches[1] not in fake_users_db.get("api_keys"):
-        logger.info(f"Invalid API key: {matches[1}")
+        logger.info(f"Invalid API key: {matches[1]}")
         raise apikey_exception
 
     else:
