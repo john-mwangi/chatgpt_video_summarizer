@@ -99,5 +99,10 @@ def fetch_video_summary(
     return JSONResponse(content={**data, **status}, status_code=status_code)
 
 
+@router_v1.get(path="/items", dependencies=[Depends(auth.validate_api_key)])
+def read_items(something: str):
+    return {"success": something}
+
+
 # Mount the router on the app
 app.include_router(router_v1, prefix=API_PREFIX)

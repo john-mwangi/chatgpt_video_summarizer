@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -21,6 +21,7 @@ API_PREFIX = ApiSettings.load_settings().api_prefix
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/token")
+secret_key = APIKeyHeader(name="X-API-Key", scheme_name="Secret header")
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -36,8 +37,8 @@ fake_users_db = {
         "email": "johndoe@example.com",
         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
         "disabled": False,
-        "api_key": "f7099f6f0f4caa6cf63b88e8d3e7",
-    }
+    },
+    "api_keys": {"f7099f6f0f4caa6cf63b88e8d3e7", "a6cf63b88e8d3e7"},
 }
 
 
@@ -59,7 +60,6 @@ class User(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
-    api_key: str
 
 
 def verify_password(plain_password, hashed_password):
@@ -125,7 +125,20 @@ def get_current_active_user(
     return current_user
 
 
+def validate_api_key(api_key: Annotated[str, Depends(secret_key)]):
+    if api_key not in fake_users_db.get("api_keys"):
+        logger.info(f"Invalid API key: {api_key}")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid API key provided",
+        )
+
+    return True
+
+
 if __name__ == "__main__":
+    import requests
+
     hashed_password1 = pwd_context.hash(secret="secret")
     hashed_password2 = (
         "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"
@@ -136,3 +149,21 @@ if __name__ == "__main__":
 
     print(hashed_password1, hashed_password2)
     print(is_valid1, is_valid2)
+
+    headers_success = {"X-API-Key": "f7099f6f0f4caa6cf63b88e8d3e7"}
+    headers_fail = {"X-API-Key": "inexistent_key"}
+
+    resp_success = requests.get(
+        url="http://0.0.0.0:12000/api/v1/items?something=value_to_return",
+        headers=headers_success,
+    )
+
+    resp_fail = requests.get(
+        url="http://0.0.0.0:12000/api/v1/items?something=value_to_return",
+        headers=headers_fail,
+    )
+
+    assert resp_success.status_code == status.HTTP_200_OK
+    assert resp_fail.status_code == status.HTTP_403_FORBIDDEN
+
+    print(resp_success.json())
