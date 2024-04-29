@@ -6,8 +6,10 @@ from video_summarizer.backend.configs.config import ApiSettings
 def main(method: str, data: dict):
     endpoint = ApiSettings.load_settings().url
     prefix = ApiSettings.load_settings().api_prefix
+    token_method = ApiSettings.load_settings().token_method
+
     url = f"{endpoint}{prefix}"
-    token_url = f"{url}/token"
+    token_url = f"{url}{token_method}"
 
     auth_headers = {
         "accept": "application/json",
