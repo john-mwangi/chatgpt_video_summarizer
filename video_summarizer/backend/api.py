@@ -1,13 +1,23 @@
 import configparser
+from typing import Annotated
 
 import yaml
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from main import main
 from pydantic import BaseModel
 
-from video_summarizer.backend.configs import configs
-from video_summarizer.backend.src.utils import logger
+from video_summarizer.backend.configs import config
+from video_summarizer.backend.utils import auth
+from video_summarizer.backend.utils.utils import logger
+
+API_PREFIX = config.ApiSettings.load_settings().api_prefix
+
+parser = configparser.ConfigParser()
+parser.read(config.ROOT_DIR / "pyproject.toml")
+version = parser["tool.poetry"]["version"].replace('"', "")
+description = parser["tool.poetry"]["description"].replace('"', "")
 
 
 class VideoUrls(BaseModel):
@@ -18,18 +28,36 @@ class VideoUrls(BaseModel):
     sort_by: str = "newest"
 
 
-config = configparser.ConfigParser()
-config.read(configs.ROOT_DIR / "pyproject.toml")
-version = config["tool.poetry"]["version"].replace('"', "")
-description = config["tool.poetry"]["description"].replace('"', "")
-
 app = FastAPI(
     title="ChatGPT Video Summarizer", description=description, version=version
 )
+
 router_v1 = APIRouter()
 
 
-@router_v1.post(path="/summarize_video")
+@router_v1.post("/token")
+def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+) -> auth.Token:
+    """Logs in a user using a username and password"""
+
+    user = auth.authenticate_user(
+        fake_db=auth.fake_users_db,
+        username=form_data.username,
+        password=form_data.password,
+    )
+
+    if not user:
+        raise auth.credentials_exception
+
+    access_token = auth.create_access_token(data={"sub": user.username})
+    return auth.Token(access_token=access_token, token_type="bearer")
+
+
+@router_v1.post(
+    path="/summarize_video",
+    dependencies=[Depends(auth.get_current_active_user)],
+)
 def fetch_video_summary(video_urls: VideoUrls):
     """Summarize a video using AI:
 
@@ -47,7 +75,7 @@ def fetch_video_summary(video_urls: VideoUrls):
     A list of video summaries
     """
 
-    with open(configs.params_path, "r") as f:
+    with open(config.params_path, "r") as f:
         responses = yaml.safe_load(f).get("responses")
 
     try:
@@ -61,16 +89,21 @@ def fetch_video_summary(video_urls: VideoUrls):
 
         data = {"data": {"summaries": summaries}}
         status = responses.get("SUCCESS")
-        status_code = configs.statuses.SUCCESS.value
+        status_code = config.statuses.SUCCESS.value
 
     except Exception as e:
         logger.exception(e)
         data = {"summaries": None}
         status = responses.get("ERROR")
-        status_code = configs.statuses.ERROR.value
+        status_code = config.statuses.ERROR.value
 
     return JSONResponse(content={**data, **status}, status_code=status_code)
 
 
+@router_v1.get(path="/items", dependencies=[Depends(auth.validate_api_key)])
+def read_items(something: str):
+    return {"success": something}
+
+
 # Mount the router on the app
-app.include_router(router_v1, prefix="/api/v1")
+app.include_router(router_v1, prefix=API_PREFIX)
