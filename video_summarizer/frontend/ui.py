@@ -72,7 +72,7 @@ if submit:
 
         response = main(method="/summarize_video", data=data)
         if response.status_code == 401:
-            st.markdown("Not authenticated!")
+            st.error("Not authenticated!")
         else:
             result, is_html = format_response(response, return_html=True)
             st.markdown("".join(result), unsafe_allow_html=is_html)
