@@ -1,8 +1,6 @@
 import streamlit as st
-import yaml
 from streamlit_tags import st_tags
 
-from video_summarizer.backend.configs.config import params_path
 from video_summarizer.frontend.server import format_response, main
 from video_summarizer.frontend.utils import validate_url
 
@@ -55,9 +53,6 @@ videos = [
     if url.strip().lower().startswith("https://www.youtube.com/watch?v=")
 ]
 
-with open(params_path, mode="r") as f:
-    endpoint = yaml.safe_load(f)["endpoint"]["url"]
-
 if submit:
     submitted_urls = set(channels + videos)
     url_validations = [validate_url(url) for url in submitted_urls]
@@ -75,6 +70,9 @@ if submit:
             "sort_by": sort_by.lower(),
         }
 
-        response = main(endpoint, data)
-        result, is_html = format_response(response, return_html=True)
-        st.markdown("".join(result), unsafe_allow_html=is_html)
+        response = main(method="/summarize_video", data=data)
+        if response.status_code == 401:
+            st.markdown("Not authenticated!")
+        else:
+            result, is_html = format_response(response, return_html=True)
+            st.markdown("".join(result), unsafe_allow_html=is_html)
