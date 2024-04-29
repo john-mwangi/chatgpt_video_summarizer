@@ -71,7 +71,7 @@ if submit:
         }
 
         response = main(method="/summarize_video", data=data)
-        if response.status_code == 401:
+        if response.status_code in (401, 403):
             st.error("Not authenticated!")
         else:
             result, is_html = format_response(response, return_html=True)
