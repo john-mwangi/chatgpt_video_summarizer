@@ -6,7 +6,7 @@ from video_summarizer.backend.src.extract_transcript import (
     main as extract_main,
 )
 from video_summarizer.backend.src.summarize_video import main as summarise_main
-from video_summarizer.backend.src.utils import logger
+from video_summarizer.backend.utils.utils import logger
 
 
 def get_videos_from_channel(
@@ -59,7 +59,7 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str]:
     elif len(v_urls) == 0 and len(channels) > 0:
         return urls
     elif len(channels) == 0 and len(v_urls) == 0:
-        raise ValueError("Update video_urls.yaml")
+        return []
     else:
         urls.extend(v_urls)
         return set(urls)

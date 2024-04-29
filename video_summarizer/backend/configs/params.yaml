@@ -11,4 +11,9 @@ responses:
   SUCCESS:
     status: VIDEO_SUMMARISED_SUCCESSFULLY
     message: "The video was successfully summarised using AI"
-endpoint: http://0.0.0.0:12000/api/v1/summarize_video
+endpoint: 
+  url: http://0.0.0.0:12000
+  api_prefix: /api/v1
+  algorithm: HS256
+  access_token_expire_minutes: 30
+  token_method: /token

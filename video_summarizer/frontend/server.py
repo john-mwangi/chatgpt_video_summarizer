@@ -1,13 +1,46 @@
 import requests
 
+from video_summarizer.backend.configs.config import ApiSettings
 
-def main(url: str, data: dict):
+
+def main(method: str, data: dict):
+    endpoint = ApiSettings.load_settings().url
+    prefix = ApiSettings.load_settings().api_prefix
+    token_method = ApiSettings.load_settings().token_method
+
+    url = f"{endpoint}{prefix}"
+    token_url = f"{url}{token_method}"
+
+    auth_headers = {
+        "accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    auth_data = {
+        "grant_type": "",
+        "username": "johndoe",
+        "password": "secret",
+        "scope": "",
+        "client_id": "",
+        "client_secret": "",
+    }
+
+    auth_response = requests.post(
+        token_url,
+        headers=auth_headers,
+        data=auth_data,
+    )
+
+    token = auth_response.json().get("access_token")
+
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}",
     }
 
-    resp = requests.post(url, headers=headers, json=data)
+    resp = requests.post(f"{url}{method}", headers=headers, json=data)
+
     return resp
 
 

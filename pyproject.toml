@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "video_summarizer"
-version = "0.1.0"
+version = "0.2.0"
 description = "Summarise videos using Gen AI"
 authors = ["John Mwangi <mail.mwangi@gmail.com>"]
 readme = "README.md"
@@ -194,6 +194,9 @@ xattr = "0.10.1"
 pymongo = "^4.6.3"
 black = "^24.3.0"
 streamlit-tags = "^1.2.8"
+python-jose = {version = "^3.3.0", extras = ["cryptography"]}
+python-multipart = "^0.0.9"
+passlib = {version = "^1.7.4", extras = ["bcrypt"]}
 
 
 [build-system]

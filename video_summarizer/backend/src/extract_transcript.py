@@ -6,7 +6,7 @@ import urllib.request
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from video_summarizer.backend.src.utils import get_mongodb_client, logger
+from video_summarizer.backend.utils.utils import get_mongodb_client, logger
 
 
 def get_video_id(url: str) -> str:

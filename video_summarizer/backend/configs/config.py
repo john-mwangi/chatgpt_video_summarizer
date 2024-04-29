@@ -2,6 +2,7 @@ from enum import Enum
 from pathlib import Path
 
 import yaml
+from fastapi import status
 from pydantic_settings import BaseSettings
 
 ROOT_DIR = Path(__file__).parent.parent.parent.parent.resolve()
@@ -11,9 +12,9 @@ video_keys = ["video_id", "video_url", "video_title", "summary"]
 
 
 class statuses(Enum):
-    SUCCESS = 200
-    ERROR = 400
-    NOT_FOUND = 404
+    SUCCESS = status.HTTP_200_OK
+    ERROR = status.HTTP_400_BAD_REQUEST
+    NOT_FOUND = status.HTTP_404_NOT_FOUND
 
 
 class ModelParams(BaseSettings):
@@ -28,6 +29,19 @@ class ModelParams(BaseSettings):
             params = yaml.safe_load(f).get("model_params")
 
         return ModelParams(**params)
+
+
+class ApiSettings(BaseSettings):
+    url: str
+    api_prefix: str
+    algorithm: str
+    access_token_expire_minutes: int
+    token_method: str
+
+    def load_settings():
+        with open(params_path, "r") as f:
+            api_settings = yaml.safe_load(f)["endpoint"]
+            return ApiSettings(**api_settings)
 
 
 prompt_template = """system: You are a helpful assistant who provides useful summaries 

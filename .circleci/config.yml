@@ -7,7 +7,7 @@ orbs:
 executors:
   docker-publisher:
     environment:
-      IMAGE_TAG: johnm01/video_summarizer:latest
+      IMAGE_TAG: johnmwangi/chatgpt-video-summarizer:latest
     docker:
       - image: cimg/python:3.10-node
         auth:
