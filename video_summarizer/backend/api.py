@@ -39,7 +39,7 @@ router_v1 = APIRouter()
 def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> auth.Token:
-    """Logs in a user using a username and password"""
+    """Logs in a user using a username and password and returns an access token"""
 
     user = auth.authenticate_user(
         fake_db=auth.fake_users_db,
