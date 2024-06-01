@@ -95,6 +95,9 @@ def create_access_token(
     data: dict,
     expires_delta: timedelta = timedelta(minutes=TOKEN_EXPIRY),
 ):
+    """Creates an access token for a validated user. The user is in the
+    `data.sub` key"""
+
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire})
@@ -104,6 +107,8 @@ def create_access_token(
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    """Authenticates a user based on the token supplied."""
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -121,6 +126,8 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 def get_current_active_user(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
+    """Determines if the current user is an active or disabled user."""
+
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
