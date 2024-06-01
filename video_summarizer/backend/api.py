@@ -1,5 +1,4 @@
 import configparser
-from typing import Annotated
 
 import yaml
 from fastapi import APIRouter, Depends, FastAPI
@@ -37,7 +36,7 @@ router_v1 = APIRouter()
 
 @router_v1.post("/token")
 def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> auth.Token:
     """Logs in a user using a username and password and returns an access token"""
 

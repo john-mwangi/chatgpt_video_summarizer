@@ -4,7 +4,6 @@ a valid username and password in order to obtain an JWT access token."""
 import os
 import re
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
@@ -106,7 +105,7 @@ def create_access_token(
     return encoded_jwt
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+def get_current_user(token: str = Depends(oauth2_scheme)):
     """Authenticates a user based on the token supplied."""
 
     try:
@@ -124,7 +123,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
 
 def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: User = Depends(get_current_user),
 ):
     """Determines if the current user is an active or disabled user."""
 
@@ -133,7 +132,7 @@ def get_current_active_user(
     return current_user
 
 
-def validate_api_key(api_key: Annotated[str, Depends(secret_key)]):
+def validate_api_key(api_key: str = Depends(secret_key)):
     # Swagger UI will accept any key but the validation happens server-side
     matches = re.match(pattern=r"Bearer\s(\w+)", string=api_key)
 
