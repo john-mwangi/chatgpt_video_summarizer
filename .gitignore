@@ -3,3 +3,4 @@ transcripts
 *.env
 files
 *.gz
+.coverage
