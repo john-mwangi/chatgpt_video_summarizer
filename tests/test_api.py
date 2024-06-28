@@ -44,7 +44,7 @@ def get_access_token(username: str, password: str):
     return token_response
 
 
-def test_auth(username: str = uname, password: str = pwd):
+def test_authentication(username: str = uname, password: str = pwd):
     """Tests then authentication/token method"""
 
     token_response = get_access_token(username, password)
@@ -75,3 +75,33 @@ def test_endpoint(method: str = "/summarize_video"):
     url = f"{endpoint}{api_prefix}{method}"
     response = requests.post(url, json=data, headers=headers)
     assert response.status_code == 200
+
+
+def test_urls_from_channel():
+    "Test the number of URLs extracted from the frontend"
+    pass
+
+
+def test_url_validation():
+    "Test URL format & domain"
+    pass
+
+
+def test_save_summaries():
+    "Test saved data includes all video keys"
+    pass
+
+
+def test_api_response():
+    "Test response includes all video keys"
+    pass
+
+
+def test_transcription():
+    "Test that videos transcript is correctly generated with all keys"
+    pass
+
+
+def test_genai_summary():
+    "Test that a summary from the Gen AI tool is being generated"
+    pass
