@@ -1,5 +1,3 @@
-"Tests the api endpoints"
-
 import os
 
 import requests
@@ -21,6 +19,8 @@ api_prefix = ApiSettings.load_settings().api_prefix
 token_method = ApiSettings.load_settings().token_method
 
 token_url = f"{endpoint}{api_prefix}{token_method}"
+video_1 = "https://www.youtube.com/watch?v=TRjq7t2Ms5I"
+video_2 = "https://www.youtube.com/watch?v=JEBDfGqrAUA"
 
 
 def get_access_token(username: str, password: str):
@@ -66,7 +66,7 @@ def test_endpoint(method: str = "/summarize_video"):
 
     data = {
         "channels": [],
-        "videos": ["https://www.youtube.com/watch?v=TRjq7t2Ms5I"],
+        "videos": [video_1, video_2],
         "limit_transcript": 0.25,
         "top_n": 2,
         "sort_by": "newest",
