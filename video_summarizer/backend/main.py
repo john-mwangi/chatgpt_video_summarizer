@@ -29,7 +29,7 @@ def get_videos_from_channel(
 
 
 def load_urls(video_urls: dict, sort_by: str) -> list[str] | set:
-    """Loads videos defined in a config file
+    """Extracts videos to be summarised.
 
     Args:
     ---
@@ -43,26 +43,20 @@ def load_urls(video_urls: dict, sort_by: str) -> list[str] | set:
 
     top_n = video_urls.get("top_n")
     channels = video_urls.get("channels", [])
+    c_urls = []
 
     if len(channels) > 0:
-        urls = []
         for channel in channels:
             u = get_videos_from_channel(
                 channel_url=channel, top_n=top_n, sort_by=sort_by
             )
-            urls.extend(u)
+            c_urls.extend(u)
 
-    v_urls = video_urls.get("videos", [])
+    v_urls: list = video_urls.get("videos", [])
 
-    if len(channels) == 0 and len(v_urls) > 0:
-        return v_urls
-    elif len(v_urls) == 0 and len(channels) > 0:
-        return urls
-    elif len(channels) == 0 and len(v_urls) == 0:
-        return []
-    else:
-        urls.extend(v_urls)
-        return set(urls)
+    v_urls.extend(c_urls)
+
+    return set(v_urls)
 
 
 def main(
@@ -111,7 +105,9 @@ if __name__ == "__main__":
         "https://www.youtube.com/watch?v=TRjq7t2Ms5I",
     ]
 
-    msgs = main(channels, videos)
+    msgs = main(
+        channels, videos, LIMIT_TRANSCRIPT=0.25, top_n=2, sort_by="newest"
+    )
     for msg in msgs:
         pprint(msg)
         print("\n\n")

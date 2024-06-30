@@ -87,7 +87,7 @@ def test_urls_from_channel():
     video_urls = {"channels": channels, "top_n": top_n, "videos": videos}
 
     yt_urls = load_urls(video_urls, sort_by="newest")
-    assert len(yt_urls) == 0 and isinstance(yt_urls, list)
+    assert len(yt_urls) == 0 and isinstance(yt_urls, set)
 
     channels = [
         "https://www.youtube.com/@ArjanCodes",
@@ -97,12 +97,14 @@ def test_urls_from_channel():
         "https://www.youtube.com/watch?v=JEBDfGqrAUA",
         "https://www.youtube.com/watch?v=TRjq7t2Ms5I",
     ]
+    videos_len = len(videos)
+
     video_urls.update({"channels": channels, "videos": videos})
 
     yt_urls = load_urls(video_urls, sort_by="newest")
 
-    assert len(yt_urls) == len(channels) * top_n + len(videos) and isinstance(
-        yt_urls, (list, set)
+    assert len(yt_urls) == len(channels) * top_n + videos_len and isinstance(
+        yt_urls, set
     )
 
 
