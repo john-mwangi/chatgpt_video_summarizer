@@ -5,6 +5,7 @@ from dotenv import find_dotenv, load_dotenv
 
 from video_summarizer.backend.configs.config import ApiSettings
 from video_summarizer.backend.main import load_urls
+from video_summarizer.frontend.utils import validate_url
 
 load_dotenv()
 
@@ -110,7 +111,17 @@ def test_urls_from_channel():
 
 def test_url_validation():
     "Test URL format & domain"
-    pass
+    assert (
+        validate_url("https://docs.pydantic.dev/latest/api/networks/") == True
+    )
+
+    assert validate_url("xxx") == False
+
+    assert validate_url("docs.pydantic.dev/latest/api/networks/") == False
+
+    assert validate_url(None) == False
+
+    assert validate_url("") == False
 
 
 def test_save_summaries():
