@@ -59,7 +59,7 @@ if submit:
     is_valid = False if not url_validations else all(url_validations)
 
     if not is_valid:
-        st.markdown("One of the urls submitted was invalid")
+        st.markdown("One of the YouTube urls submitted was invalid")
 
     else:
         data = {
