@@ -1,10 +1,18 @@
+import os
+
 import requests
+from dotenv import find_dotenv, load_dotenv
 
 from video_summarizer.backend.configs.config import ApiSettings
 
+load_dotenv()
+app_env = os.environ.get("APP_ENV")
+env_file = f"{app_env}.env"
+load_dotenv(find_dotenv(env_file))
+
 
 def main(method: str, data: dict):
-    endpoint = ApiSettings.load_settings().url
+    endpoint = os.environ.get("ENDPOINT")
     prefix = ApiSettings.load_settings().api_prefix
     token_method = ApiSettings.load_settings().token_method
 
