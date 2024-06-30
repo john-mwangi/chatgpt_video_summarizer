@@ -26,8 +26,8 @@ def main(method: str, data: dict):
 
     auth_data = {
         "grant_type": "",
-        "username": "johndoe",
-        "password": "secret",
+        "username": os.environ.get("_USERNAME"),
+        "password": os.environ.get("_PASSWORD"),
         "scope": "",
         "client_id": "",
         "client_secret": "",
