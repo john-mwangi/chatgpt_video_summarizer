@@ -4,6 +4,7 @@ import requests
 from dotenv import find_dotenv, load_dotenv
 
 from video_summarizer.backend.configs.config import ApiSettings
+from video_summarizer.backend.main import load_urls
 
 load_dotenv()
 
@@ -79,7 +80,30 @@ def test_endpoint(method: str = "/summarize_video"):
 
 def test_urls_from_channel():
     "Test the number of URLs extracted from the frontend"
-    pass
+
+    channels: list = []
+    videos: list = []
+    top_n: int = 3
+    video_urls = {"channels": channels, "top_n": top_n, "videos": videos}
+
+    yt_urls = load_urls(video_urls, sort_by="newest")
+    assert len(yt_urls) == 0 and isinstance(yt_urls, list)
+
+    channels = [
+        "https://www.youtube.com/@ArjanCodes",
+        "https://www.youtube.com/@CBSNews",
+    ]
+    videos = [
+        "https://www.youtube.com/watch?v=JEBDfGqrAUA",
+        "https://www.youtube.com/watch?v=TRjq7t2Ms5I",
+    ]
+    video_urls.update({"channels": channels, "videos": videos})
+
+    yt_urls = load_urls(video_urls, sort_by="newest")
+
+    assert len(yt_urls) == len(channels) * top_n + len(videos) and isinstance(
+        yt_urls, (list, set)
+    )
 
 
 def test_url_validation():

@@ -28,7 +28,7 @@ def get_videos_from_channel(
     return [f"https://www.youtube.com/watch?v={v}" for v in vids]
 
 
-def load_urls(video_urls: dict, sort_by: str) -> list[str]:
+def load_urls(video_urls: dict, sort_by: str) -> list[str] | set:
     """Loads videos defined in a config file
 
     Args:
