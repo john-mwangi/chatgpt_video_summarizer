@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, ValidationError
 
 from video_summarizer.backend.utils.utils import logger
 
@@ -11,7 +11,7 @@ def validate_url(url: str) -> bool:
     try:
         Url(url=url)
         is_valid = True
-    except:
+    except ValidationError:
         logger.warning(f"Invalid url: {url}")
         is_valid = False
 

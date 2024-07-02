@@ -46,5 +46,9 @@ db.createUser(
 - Enter a channel url or video url to the api
 - Video summaries will be saved in the database and display on the app
 
+### Running tests
+* tests: `pytest -vs`
+* coverage report: `pytest --cov --cov-report=html`
+
 ## Web App
 ![Sample video summary](./app_ss.png)
