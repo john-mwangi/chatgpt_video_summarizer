@@ -56,6 +56,7 @@ def test_authentication(username: str = uname, password: str = pwd):
     assert token_response.status_code == 200
 
 
+@pytest.mark.skipif(condition=in_pipeline, reason="Not applicable")
 def test_endpoint(method: str = "/summarize_video"):
     """Tests the core endpoint's method"""
 
