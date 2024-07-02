@@ -32,7 +32,6 @@ class ModelParams(BaseSettings):
 
 
 class ApiSettings(BaseSettings):
-    url: str
     api_prefix: str
     algorithm: str
     access_token_expire_minutes: int

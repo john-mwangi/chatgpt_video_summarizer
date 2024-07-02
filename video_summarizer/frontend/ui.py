@@ -59,7 +59,7 @@ if submit:
     is_valid = False if not url_validations else all(url_validations)
 
     if not is_valid:
-        st.markdown("One of the urls submitted was invalid")
+        st.markdown("One of the YouTube urls submitted was invalid")
 
     else:
         data = {
@@ -71,8 +71,8 @@ if submit:
         }
 
         response = main(method="/summarize_video", data=data)
-        if response.status_code == 401:
-            st.markdown("Not authenticated!")
+        if response.status_code in (401, 403):
+            st.error("Incorrect username or password!")
         else:
             result, is_html = format_response(response, return_html=True)
             st.markdown("".join(result), unsafe_allow_html=is_html)
