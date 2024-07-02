@@ -30,6 +30,19 @@ def validate_url(url: str) -> bool:
     return is_valid
 
 
+def extract_channels_and_videos(urls: list[str]):
+    channels = []
+    videos = []
+
+    for url in urls:
+        if url.__contains__("@"):
+            channels.append(url)
+        else:
+            videos.append(url)
+
+    return channels, videos
+
+
 if __name__ == "__main__":
     assert (
         validate_url("https://docs.pydantic.dev/latest/api/networks/") == True
