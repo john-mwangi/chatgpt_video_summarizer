@@ -31,8 +31,8 @@ jobs:
       - store_test_results:
           path: junit.xml
       - store_artifacts:
-          path: tests/htmlcov
-          # destination: artifact-files
+          path: htmlcov
+          destination: coverage-report
 
   build-docker:
     executor: docker-publisher
