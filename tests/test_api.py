@@ -1,5 +1,6 @@
 import os
 
+import pytest
 import requests
 from dotenv import find_dotenv, load_dotenv
 
@@ -19,6 +20,7 @@ uname = os.environ.get("_USERNAME")
 pwd = os.environ.get("_PASSWORD")
 api_prefix = ApiSettings.load_settings().api_prefix
 token_method = ApiSettings.load_settings().token_method
+in_pipeline = True if os.environ.get("CIRCLECI") is not None else False
 
 token_url = f"{endpoint}{api_prefix}{token_method}"
 video_1 = "https://www.youtube.com/watch?v=TRjq7t2Ms5I"
@@ -46,6 +48,7 @@ def get_access_token(username: str, password: str):
     return token_response
 
 
+@pytest.mark.skipif(condition=in_pipeline, reason="Not applicable")
 def test_authentication(username: str = uname, password: str = pwd):
     """Tests then authentication/token method"""
 
